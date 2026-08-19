@@ -65,3 +65,8 @@ this convention. `survey.py`'s `generate_blif()` outputs this order.
 
 Proceed one substantive action at a time when debugging. Don't give a
 cascade of commands before confirming the previous one worked.
+
+## Git
+
+- Commit when asked, or when completing a logical unit of work.
+- Do **not** push. The user handles pushes themselves.
