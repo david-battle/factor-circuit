@@ -7,107 +7,91 @@
 0
 .names p3
 0
-.names x1 x3 win_17_g0
-10 1
-.names x0 win_17_g0 win_20_g0
-11 1
-.names x0 x4 win_42_g1
-10 1
-.names x2 win_42_g1 win_42_g2
+.names x3 x1 new_n23
 01 1
-.names x1 win_42_g2 win_42_g3
+.names x0 new_n23 win_13_g0
+11 1
+.names x0 x4 win_37_g0
 10 1
-.names x2 win_42_g1 win_42_g4
+.names x2 win_37_g0 win_37_g1
+01 1
+.names x1 x2 win_37_g2
 10 1
-.names win_42_g3 win_42_g4 win_42_g5
+.names win_37_g0 win_37_g2 win_37_g3
+00 1
+.names win_37_g1 win_37_g3 win_37_g4
+00 1
+.names win_13_g0 win_37_g4 win_37_g5
 10 1
-.names win_20_g0 win_42_g5 win_42_g6
-10 1
-.names win_42_g6 win_32_g3
+.names win_37_g5 win_20_g5
 1 1
-.names win_32_g3 win_20_g1
+.names win_20_g5 win_14_g2
 1 1
-.names win_20_g1 win_0_g2
+.names win_14_g2 win_13_g1
 1 1
-.names win_0_g2 p2
+.names win_13_g1 win_1_g1
 1 1
-.names win_32_g3 win_26_g2
+.names win_1_g1 p2
 1 1
-.names win_26_g2 win_24_g4
+.names win_20_g5 win_5_g1
 1 1
-.names win_24_g4 win_10_g1
-1 1
-.names win_10_g1 p1
+.names win_5_g1 p1
 0 1
-.names x0 win_17_g2
+.names x0 win_2_g0
 0 1
-.names win_17_g2 p0
+.names win_2_g0 p0
 0 1
 .names q5
 0
-.names x4 x2 new_n74
+.names x5 win_37_g5 win_37_g6
 10 1
-.names x0 new_n74 win_30_g1
-10 1
-.names x5 win_30_g1 win_30_g2
-10 1
-.names win_30_g2 q4
+.names win_37_g0 win_37_g6 win_37_g7
+01 1
+.names win_37_g7 win_36_g2
 1 1
-.names win_20_g0 win_0_g1
+.names win_36_g2 win_27_g2
 1 1
-.names x2 win_0_g1 win_18_g2
+.names win_27_g2 win_4_g2
+1 1
+.names win_4_g2 q4
+1 1
+.names x2 win_13_g0 win_13_g3
 11 1
-.names x1 x4 win_48_g4
+.names win_13_g3 win_1_g2
+1 1
+.names win_1_g2 new_n61
+1 1
+.names x1 x4 win_34_g0
 00 1
-.names win_18_g2 win_48_g4 win_48_g5
+.names win_34_g0 new_n78
+1 1
+.names new_n61 new_n78 new_n83
 00 1
-.names win_48_g5 win_39_g1
-1 1
-.names win_39_g1 win_18_g4
-1 1
-.names win_18_g4 new_n83
-1 1
-.names x0 x4 win_16_g0
+.names x0 x4 win_7_g0
 01 1
-.names new_n83 win_16_g0 win_16_g1
+.names new_n83 win_7_g0 win_7_g1
 10 1
-.names win_16_g1 win_13_g2
-1 1
-.names win_13_g2 q3
+.names win_7_g1 q3
 0 1
-.names x1 x5 win_38_g2
+.names x1 x5 win_49_g1
+01 1
+.names x0 x4 win_49_g0
+10 1
+.names x1 win_49_g0 win_49_g2
+10 1
+.names x3 win_49_g2 win_49_g3
+01 1
+.names win_49_g1 win_49_g3 win_49_g4
 00 1
-.names win_38_g2 win_21_g1
+.names win_49_g4 win_9_g1
 1 1
-.names win_21_g1 new_n47
+.names win_9_g1 q2
 1 1
-.names x0 x4 win_48_g1
-10 1
-.names x0 x3 win_48_g0
-01 1
-.names x5 win_48_g0 win_48_g2
-10 1
-.names win_48_g1 win_48_g2 win_48_g3
-01 1
-.names win_48_g3 win_6_g4
+.names win_37_g4 win_20_g4
 1 1
-.names win_6_g4 new_n89
+.names win_20_g4 win_0_g2
 1 1
-.names x3 x5 win_5_g0
-00 1
-.names x1 win_5_g0 win_5_g2
-10 1
-.names win_5_g2 new_n90
-1 1
-.names new_n89 new_n90 new_n91
-01 1
-.names new_n47 new_n91 q2
-00 0
-.names win_42_g5 win_41_g7
-1 1
-.names win_41_g7 win_40_g1
-1 1
-.names win_40_g1 q1
+.names win_0_g2 q1
 0 1
 .names q0
 1

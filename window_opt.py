@@ -309,8 +309,10 @@ def get_window_care_set(aig, W_in, W_out, W_gates, care_points, N, use_odc=True)
         elif typ == 'AND' and (args[0] in fanout_cone or args[2] in fanout_cone):
             fanout_cone.add(n)
 
-    # Nodes to re-simulate: fanout cone minus W_out and minus W_gates
-    eval_order = [n for n in topo if n in fanout_cone and n not in W_out and n not in W_gates]
+    # Nodes to re-simulate: fanout cone minus W_out (W_gates are included
+    # so they re-evaluate with new W_out values, giving correct inputs to
+    # downstream nodes that depend on both W_out and W_gates).
+    eval_order = [n for n in topo if n in fanout_cone and n not in W_out]
 
     for (x, p, q) in care_points:
         input_vals = {f"x{i}": (x >> i) & 1 for i in range(N)}

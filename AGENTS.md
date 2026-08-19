@@ -27,8 +27,8 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
 ---|------------|-----|------|------|-------------------------------
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
- 6 |         18 |  10 |   25 |  15  | ABC + windowed resynthesis
- 7 |         37 |  11 |  133 | 122  | ABC + windowed resynthesis
+ 6 |         18 |  10 |   20 |  10  | ABC + ODC windowed resynthesis
+ 7 |         37 |  11 |   90 |  79  | ABC + ODC windowed resynthesis
 ```
 
 LBs for N=4,5 from full SAT proof. LBs for N=6,7 from `survey.py` SAT
@@ -51,9 +51,9 @@ encoding with one-hot selectors (~50K clause wall at k=12).
 | `exact_factor6_budget.py` | SAT exact synthesizer for N=6 with budget-based solving. |
 | `make_blif.py` | N=4 BLIF generator (superseded by survey.py). |
 | `factor6_opt_final.blif` | N=6 ABC-optimized baseline (90 AND gates). |
-| `factor6_opt_final_opt.blif` | N=6 after windowed resynthesis (25 AND gates). |
+| `factor6_opt_final_opt.blif` | N=6 after windowed resynthesis (20 AND gates). |
 | `factor7_opt.blif` | N=7 ABC-optimized baseline (229 AND gates). |
-| `factor7_opt_final.blif` | N=7 after windowed resynthesis (133 AND gates). |
+| `factor7_opt_final.blif` | N=7 ABC pipeline baseline (133 AND gates). |
 
 ## Bit-Ordering Convention
 

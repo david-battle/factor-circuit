@@ -14,8 +14,8 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
 ---|------------|-----|------|------|-------------------------------
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
- 6 |         18 |  10 |   25 |  15  | ABC + windowed resynthesis
- 7 |         37 |  11 |  133 | 122  | ABC + windowed resynthesis
+ 6 |         18 |  10 |   20 |  10  | ABC + ODC windowed resynthesis
+ 7 |         37 |  11 |   90 |  79  | ABC + ODC windowed resynthesis
 ```
 
 ## How We Got Here — Chronological Summary
@@ -60,11 +60,9 @@ SAT-proven optimal replacements.
 4. If found with fewer gates, splice it in and verify.
 5. Repeat hundreds of times.
 
-**N=6 results:** ABC baseline 90 gates → **25 gates** (72% reduction).
-Multiple random seeds all converge to ~25 gates.
+**N=6 results:** ABC baseline 90 gates → **20 gates** (78% reduction).
 
-**N=7 results:** ABC baseline 229 gates → **133 gates** (42% reduction).
-Improvements become very sparse once the circuit is small.
+**N=7 results:** ABC baseline 229 gates → **90 gates** (61% reduction).
 
 **Key limitation:** Window size is bounded by SAT encoding size. With 7+
 inputs or 4+ outputs, the SAT solver times out. This is the same one-hot
@@ -81,17 +79,27 @@ encoding bottleneck as the LB approach.
 - **Added AIG methods**: `prune()` (remove unreachable nodes), `has_cycle()`
   (DFS cycle detection), robust `toposort()` (handles missing nodes).
 
-## ODC Bug — Known Issue
+### Phase 5: ODC Fix and UB Improvement
 
-SDC mode works correctly but is conservative (one output pattern per input
-pattern). ODC mode should allow multiple output patterns per input pattern,
-giving SAT more freedom. But ODC produces incorrect results — a brute-force
-test shows many valid patterns are rejected by the ODC extraction.
+- **Fixed ODC mode** in `window_opt.py`: Removed W_gates exclusion from
+  `eval_order` so downstream nodes depending on both W_out and W_gates are
+  re-simulated with correct (updated) W_gate values. Validated by
+  brute-force comparison on 20 random windows at N=6.
+- **Re-ran windowed resynthesis** with ODC enabled, chaining multiple passes
+  with different seeds:
+  - N=6: 25 → **20** gates (78% reduction from ABC baseline)
+  - N=7: 133 → **90** gates (61% reduction from ABC baseline)
+- Plateaued at these values — further passes with different seeds produced
+  0 improvements, suggesting near the limit of current window constraints.
 
-The ODC re-simulation checks global output nodes but may miss intermediate
-fanout-cone dependencies. The brute-force test itself may also have a bug
-(re-simulating window gates with altered outputs changes their downstream
-effect incorrectly). Root cause not yet determined.
+## ODC Bug — Fixed
+
+The previous bug was that the fanout-cone re-simulation excluded W_gates from
+`eval_order`, so downstream nodes that depended on both W_out and a W_gate
+were re-simulated with stale W_gate values. Fix: include W_gates in
+`eval_order` (window_opt.py:313). Validated by brute-force comparison on 20
+random windows at N=6 — all matched the gold-standard full-circuit
+re-simulation.
 
 ## Key Technical Insights
 
@@ -107,13 +115,12 @@ effect incorrectly). Root cause not yet determined.
    compressed. Larger windows would help but SAT can't handle them yet.
 
 4. **ABC is good but not optimal.** ABC's global heuristics find decent
-   circuits (229 for N=7) but windowed resynthesis can cut them by 42-72%.
+   circuits (229 for N=7) but windowed resynthesis can cut them by 61-78%.
 
 ## What's Left To Do
 
 **High priority:**
 - Binary selector encoding (for both LB and window SAT) — biggest leverage
-- Fix ODC mode — would allow larger effective don't-care sets
 - Incremental SAT for LB binary search
 
 **Medium priority:**

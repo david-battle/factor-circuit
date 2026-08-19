@@ -75,7 +75,7 @@ Returns `dict[tuple(in_vals) -> set(tuple(out_vals))]`.
 simulate the full circuit, record what W_in→W_out mapping the original
 circuit produces. Each input pattern maps to exactly one output pattern.
 
-**ODC mode** (default, currently broken): For each care point and each of
+**ODC mode** (default, working): For each care point and each of
 2^|W_out| possible output patterns, re-simulate the fanout cone of W_out
 with the trial output values, check if global outputs still match. Allows
 multiple output patterns per input pattern, giving SAT more freedom.
@@ -120,16 +120,14 @@ python3 window_opt.py <blif> [N] [iterations] [--sdc] [--seed S] \
 Defaults: N=6, 200 iterations, ODC mode, max_inputs=6, max_outputs=3,
 max_gates=15.
 
-### Known Bugs
+### Status: ODC Fixed
 
-**ODC mode produces incorrect care sets.** A brute-force comparison shows
-ODC rejects many output patterns that are actually valid (too conservative).
-The ODC fanout-cone re-simulation only checks global output nodes in
-`req.items()` but does not re-evaluate all nodes in the cone. Additionally,
-the brute-force test itself may have a bug (it re-simulates window gates
-with new output values, which changes their fanout incorrectly). This
-contradicts earlier observations where ODC solutions failed verification.
-Root cause unclear; needs investigation.
+**ODC mode — fixed.** The previous bug was that the fanout-cone re-simulation
+excluded W_gates from `eval_order`, so downstream nodes that depended on both
+W_out and a W_gate were re-simulated with stale W_gate values. Fix: include
+W_gates in `eval_order` (they re-evaluate with the new W_out values, giving
+correct inputs to downstream nodes). Validated by brute-force comparison on 20
+random windows (N=6, all matched).
 
 ---
 
@@ -214,19 +212,7 @@ where learned clauses at k transfer to k+1.
 
 Current window size (6 inputs, 3 outputs, 15 gates) limits optimization.
 Larger windows (7+ inputs, 4+ outputs) cause SAT timeouts due to one-hot
-encoding scaling. Requires binary selector encoding (above) or ODC fix
-(to make SAT instances easier with larger don't-care sets).
-
-## Unimplemented: ODC Fix
-
-SDC mode is conservative (only the original output pattern is allowed per
-input pattern). ODC mode allows multiple output patterns, giving SAT more
-freedom. Currently ODC is broken — see Known Bugs above.
-
-The correct approach: for each care point, re-simulate only the fanout cone
-of W_out (downstream nodes that depend on W_out), checking that all global
-output nodes still match their required values. Do NOT re-simulate W_gates
-themselves (they're being replaced).
+encoding scaling. Requires binary selector encoding (above).
 
 ## Unimplemented: Higher N
 
