@@ -46,19 +46,22 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
 ---|------------|-----|------|------|-------------------------------
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
- 6 |         18 |  10 |   19 |   9  | ABC + corrected ODC windowed resynth
+ 6 |         18 | ≥11 |   19 | ≤ 8  | ABC + corrected ODC windowed resynth (LB corrected)
  7 |         37 |  11 |   74 |  63  | ABC + corrected ODC windowed resynth
  8 |         76 |  10 |  208 | 198  | ABC + corrected ODC windowed resynth
 ```
 
-LBs for N=4,5 from full SAT proof. LBs for N=6,7 from `survey.py` SAT
-encoding with one-hot selectors (~50K clause wall at k=11+).
+LBs for N=4,5 from full SAT proof in `survey.py`. LB for N=6 from
+`survey.py` plus `exact_n6_from_above.py` / `run_n6_sweep.py`
+(LB≥11; k=10 proven UNSAT, k=9 proven UNSAT). N=7 and N=8 LBs are from
+the `survey.py` one-hot SAT encoding before the exact-synthesis clause wall.
 UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
 
 ## Tools
 
-- **Python 3** with python-sat 1.9.dev15 (Glucose4 solver).
-- **Berkeley ABC9**: `~/factor-circuit/abc/abc`. Used for heuristic
+- **Python 3** with python-sat 1.9.dev15. Current main scripts primarily use
+  the `cd153` solver; some legacy experiments used Glucose4.
+- **Berkeley ABC**: `~/factor-circuit/abc/abc`. Used for heuristic
   optimization and BLIF I/O.
 - **WSL Ubuntu** Linux environment.
 
@@ -66,10 +69,11 @@ UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
 
 | File | Purpose |
 |------|---------|
-| `window_opt.py` | SAT-based windowed resynthesis (~1166 lines). Primary UB tool. |
-| `survey.py` | ABC UB survey + SAT LB binary search (~603 lines). |
-| `exact_factor4.py` | SAT exact synthesizer for N=4 (validated approach). |
-| `exact_factor6_budget.py` | SAT exact synthesizer for N=6 with budget-based solving. |
+| `window_opt.py` | SAT-based windowed resynthesis. Primary UB tool. |
+| `survey.py` | ABC UB survey + SAT LB binary search; source of N=4/N=5 exact proofs. |
+| `exact_n6_from_above.py` | Current N=6 exact-synthesis helper, testing k values from the proven lower bound upward. |
+| `run_n6_sweep.py` | N=6 windowed-resynthesis parameter sweep around the 19-gate UB. |
+| `exact_factor6_budget.py` | Legacy N=6 budget-based exact-synthesis experiment. |
 | `make_blif.py` | N=4 BLIF generator (superseded by survey.py). |
 | `factor6_opt_final.blif` | N=6 ABC-optimized baseline (90 AND gates). |
 | `factor6_opt_final_opt.blif` | N=6 after windowed resynthesis (19 AND gates). |
@@ -78,6 +82,38 @@ UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
 | `factor7_opt_final_opt_opt.blif` | N=7 after windowed resynthesis (74 AND gates). |
 | `factor8_opt_final.blif` | N=8 ABC pipeline baseline (347 AND gates). |
 | `factor8_opt_final_opt_opt_opt_opt_opt.blif` | N=8 after windowed resynthesis (208 AND gates). |
+
+## Current Handoff
+
+- Current best results are the table above. Treat older `LB=10` claims for
+  N=6 as superseded; the corrected status is `LB≥11`, `UB=19`.
+- Canonical final UB artifacts are `factor6_opt_final_opt.blif`,
+  `factor7_opt_final_opt_opt.blif`, and
+  `factor8_opt_final_opt_opt_opt_opt_opt.blif`.
+- Before continuing, run:
+
+  ```bash
+  python3 -m compileall -q .
+  git diff --check
+  ```
+
+- To verify the canonical BLIF artifacts:
+
+  ```bash
+  python3 - <<'PY'
+  from window_opt import parse_blif, count_and_gates, verify_circuit, enumerate_care
+
+  for path, n in [
+      ("factor6_opt_final_opt.blif", 6),
+      ("factor7_opt_final_opt_opt.blif", 7),
+      ("factor8_opt_final_opt_opt_opt_opt_opt.blif", 8),
+  ]:
+      aig = parse_blif(path)
+      care = enumerate_care(n)
+      correct, total = verify_circuit(aig, care, n)
+      print(f"{path}: {count_and_gates(aig)} AND gates, {correct}/{total} care points")
+  PY
+  ```
 
 ## Bit-Ordering Convention
 

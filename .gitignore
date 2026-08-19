@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+.pytest_cache/
 *.swp
 *.swo
 *.old
@@ -9,6 +10,9 @@ __pycache__/
 abc/
 
 # Intermediate optimization files
+*.dot
+*_tmp.blif
+*_work.blif
 factor6_opt2.blif
 factor7_opt2.blif
 factor7_opt_opt.blif

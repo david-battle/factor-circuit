@@ -14,7 +14,7 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
 ---|------------|-----|------|------|-------------------------------
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
- 6 |         18 |  10 |   19 |   9  | ABC + ODC windowed resynthesis
+ 6 |         18 | ≥11 |   19 | ≤ 8  | ABC + ODC windowed resynth (LB corrected)
  7 |         37 |  11 |   74 |  63  | ABC + ODC windowed resynthesis
  8 |         76 |  10 |  208 | 198  | ABC + ODC windowed resynthesis
 ```
@@ -33,13 +33,15 @@ redundancies. This pushed N=7 ABC UB from 267 → 246 → 225 gates.
 
 ### Phase 2: SAT Exact Synthesis (middle sessions)
 
-Built custom SAT encoders (`exact_factor4.py`, `exact_factor6_budget.py`)
+Built custom SAT encoders (now superseded by `survey.py` for N=4/N=5 and
+current N=6 helpers)
 that prove circuit-size lower bounds. Encoding: one-hot source selectors,
 gate symmetry breaking, skip constant-0 outputs.
 
 - N=4: Proved optimal at 1 AND gate.
 - N=5: Proved optimal at 4 AND gates.
-- N=6: Proved LB=10 (k=10 SAT, k=9 UNSAT).
+- N=6: Initially reported LB=10 (k=10 SAT, k=9 UNSAT); superseded below by
+  the Aug 19, 2026 correction proving k=10 UNSAT and LB≥11.
 - N=7: Proved LB=11 (k=11 solvable at ~42s; k=12 hits 50K clause wall).
 
 The one-hot encoding scales as O(k² × C) clauses. For N=7 (C=37 care
@@ -48,7 +50,7 @@ in reasonable time. This is the fundamental scalability bottleneck.
 
 ### Phase 3: Windowed Resynthesis (recent sessions)
 
-Implemented `window_opt.py` (~1166 lines) — a SAT-based tool that takes
+Implemented `window_opt.py` — a SAT-based tool that takes
 an ABC-optimized circuit and iteratively replaces small subcircuits with
 SAT-proven optimal replacements.
 
@@ -336,7 +338,7 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
 ---|------------|-----|------|------|-------------------------------
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
- 6 |         18 |  10 |   19 |   9  | ABC + corrected ODC windowed resynth
+ 6 |         18 | ≥11 |   19 | ≤ 8  | ABC + corrected ODC windowed resynth (LB corrected)
  7 |         37 |  11 |   74 |  63  | ABC + corrected ODC windowed resynth
  8 |         76 |  10 |  208 | 198  | ABC + corrected ODC windowed resynth
 ```
@@ -386,3 +388,90 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
   provide free unit propagation that CDCL solvers exploit heavily.
   Compact AMO encodings weaken propagation and hurt performance more
   than they help clause count.
+
+## Session: N=6 Exact-from-Above Attempt (Aug 19, 2026)
+
+### Goal
+
+Close the N=6 gap by trying exact synthesis around the then-believed lower
+bound and working upward.
+
+### CRITICAL FINDING: LB=10 Was Wrong
+
+Re-tested the survey.py SAT encoding for N=6:
+
+- k=9: UNSAT in 5.4s
+- **k=10: UNSAT in 37.6s** (was claimed to be SAT)
+- k=11: TIMEOUT at 600s (21831 clauses)
+
+Both survey.py encoding (skips constant-0 outputs) and
+exact_factor6_budget.py encoding (no output skipping) agree: **k=10 is
+UNSAT**. The earlier claim "N=6: Proved LB=10 (k=10 SAT, k=9 UNSAT)"
+was incorrect. The true LB for N=6 is at least 11.
+
+**Corrected N=6 status: LB ≥ 11, UB = 19, Gap ≤ 8.**
+
+### Windowed Resynthesis Stuck at 19
+
+Attempted aggressive windowed resynthesis on factor6_opt_final_opt.blif:
+- 500 iters, max_in=4, max_out=2, max_gates=8: 0 improvements
+- 1000 iters, max_in=6, max_out=3, max_gates=19: 0 improvements
+- All sub-windows are locally optimal; cannot escape the 19-gate local min.
+
+### Script: exact_n6_from_above.py
+
+Wrote a clean SAT exact synthesizer that tries k=10..18 using the proven
+survey.py encoding. Abandoned after discovering k=10 is UNSAT.
+
+## Session: Consolidation and Final Status (Aug 19, 2026)
+
+### Summary of N=6 Investigation
+
+**Corrected Results Table:**
+```
+N  | Semiprimes | LB   | UB  | Gap  | Status
+---|------------|------|-----|------|---------------------
+ 4 |          4 |   1  |  1  |   =  | Sat: Verified optimal
+ 5 |          7 |   4  |  4  |   =  | Sat: Verified optimal
+ 6 |         18 | ≥11  | 19  | ≤ 8  | GAP: Upper bound improved, lower bound needs more work
+```
+
+### What Was Accomplished
+
+1. **LB Correction**: Re-tested k=10 and confirmed it's UNSAT. LB is at least 11 (not 10 as previously claimed).
+
+2. **Windowed Resynthesis Exploration**:
+   - Ran multiple configurations with up to 1000 iterations
+   - Found zero improvements on the 19-gate circuit
+   - All sub-windows are locally optimal
+
+3. **Exact Synthesis Attempts**:
+   - k=9 UNSAT: 5.4s (fast)
+   - k=10 UNSAT: 37.6s (survey.py), 143s (budget encoding)
+   - k=11: TIMEOUT at 600s (21831 clauses)
+   - k=12: TIMEOUT at 600s
+   - The one-hot encoding hits a wall at k=11
+
+4. **UB Status**: 19 gates from windowed resynthesis is the best found after ODC bug fix.
+
+### Why Progress Has Stalled
+
+1. **Windowed Resynthesis**: Local minimum at 19 gates - every sub-window can't be improved.
+
+2. **One-Hot Exact Encoding**: Hits UNSAT/SAT wall at ~22K clauses for k=11. The symmetric AMO constraints and propagation burden scale poorly.
+
+3. **Binary Selector Encoding**: REJECTED in AGENTS.md as slower in practice.
+
+### Future Directions (for next session)
+
+To continue the project, the most useful next work is either closing the
+N=6 gap (`LB≥11`, `UB=19`) or extending/strengthening the N=8 result.
+Potential strategies:
+
+1. **Multi-day SAT runs**: N=6 k=11 might complete UNSAT given enough runtime (~1000+ s)
+
+2. **Alternative encodings**: Cardinality constraints or custom AMO encodings tailored to factoring constraints.
+
+3. **Circuit-level analysis**: Examining specific gate combinations in the N=6 19-gate circuit to find redundancies.
+
+4. **ABC pipeline variants**: The original path followed the default `dch//dc2` pipeline. Different ratios might yield smaller circuits for a better starting point.

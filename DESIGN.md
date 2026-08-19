@@ -2,11 +2,12 @@
 
 ## Overview
 
-Two complementary approaches to finding small factoring circuits:
+Three complementary approaches to finding small factoring circuits:
 
 1. **SAT exact synthesis** (`survey.py` LB phase): Proves lower bounds by
-   showing no k-gate circuit exists. Works for N<=5; hits a ~50K clause wall
-   at k=12 for N=6+.
+   showing no k-gate circuit exists. It proves N=4 and N=5 optimal, proves
+   N=6 has LB≥11 (`k=10` UNSAT), and then hits scaling limits on larger
+   exact searches.
 
 2. **SAT-based windowed resynthesis** (`window_opt.py`): Constructs upper
    bounds by taking an ABC-optimized circuit and iteratively replacing small
@@ -31,7 +32,7 @@ Load BLIF → AIG → [optimize_circuit loop] → Write BLIF
             1. select_window()
             2. get_window_care_set()
             3. for k = 0..old-1:
-                 build_window_cnf(k)
+                 build_window_cnf_tracked(k)
                  SAT solve
             4. decode_model()
             5. splice_window()
@@ -80,7 +81,7 @@ circuit produces. Each input pattern maps to exactly one output pattern.
 with the trial output values, check if global outputs still match. Allows
 multiple output patterns per input pattern, giving SAT more freedom.
 
-### SAT Encoding: `build_window_cnf(I, O, care_list, k)`
+### SAT Encoding: `build_window_cnf_tracked(I, O, care_list, k)`
 
 One-hot selector encoding:
 - **Gate sources**: For each of k gates, two inputs, each selects from
@@ -94,7 +95,7 @@ One-hot selector encoding:
   the allowed set (list of disallowed pattern clauses).
 
 Variables: ~3000 for typical windows (I=6, O=3, k=15, C=37).
-Clauses: ~8000-12000. Solves in <1s with Glucose4.
+Clauses: ~8000-12000. Current runs use python-sat with the `cd153` solver.
 
 ### Splicing: `splice_window()`
 
@@ -179,18 +180,24 @@ breaking):
 
 ---
 
-## Implemented: Exact Synthesis (N=4, N=6)
+## Implemented: Exact Synthesis (N=4, N=5, N=6)
 
-### `exact_factor4.py`
+### `survey.py`
 
-Proved N=4 optimal at 1 AND gate. Full enumeration: k=0 UNSAT, k=1 SAT.
-Validated the SAT encoding approach. Only 4 of 16 inputs are care points;
-massive don't-care freedom.
+Proves the small exact lower bounds: N=4 optimal at 1 AND gate and N=5
+optimal at 4 AND gates. For N=6, it proves k=9 and k=10 UNSAT, establishing
+LB≥11.
+
+### `exact_n6_from_above.py` / `run_n6_sweep.py`
+
+Current N=6 exact-synthesis and sweep helpers. They start from the corrected
+lower-bound region and try to close the gap between LB≥11 and the 19-gate UB.
 
 ### `exact_factor6_budget.py`
 
-Budget-based SAT solver for N=6 with `conf_budget()` / `solve_limited()`.
-Established LB=10 for N=6 (k=10 SAT, k=9 UNSAT).
+Legacy N=6 budget-based SAT experiment using `conf_budget()` /
+`solve_limited()`. It is retained for comparison, but is not an N=7 proof
+source.
 
 ---
 
@@ -210,11 +217,11 @@ bottleneck is encoding size at high k, not the search structure.
 
 ## Implemented: Larger Windows
 
-Default window size is now 6 inputs, 4 outputs, 30 gates. The corrected
+Default CLI window parameters are 6 inputs, 3 outputs, and 20 gates. The corrected
 ODC care set (intersection instead of union) prevents verification failures
 that previously plagued larger windows. Larger windows find deeper
-optimizations: N=8 dropped from 347 → 208 gates with max_gates=30,
-max_out=4. Typical solve times remain under 1s per window.
+optimizations: N=8 dropped from 347 → 208 gates in the best recorded
+multi-pass run. Typical solve times remain under 1s per window.
 
 Even larger windows (7+ inputs) still cause SAT timeouts due to one-hot
 encoding scaling.
