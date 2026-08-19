@@ -1,0 +1,41 @@
+# Benchmark "factor4" written by ABC on Mon Aug 17 11:50:05 2026
+.model factor4
+.inputs x3 x2 x1 x0
+.outputs p3 p2 p1 p0 q3 q2 q1 q0
+.names x3 x2 new_n14
+11 1
+.names x0 new_n14 new_n15
+10 1
+.names x3 x2 new_n16
+00 1
+.names x1 new_n16 new_n17
+10 1
+.names new_n15 new_n17 p2
+01 1
+.names x3 x0 new_n19
+11 1
+.names x3 x0 new_n20
+00 1
+.names new_n19 new_n20 new_n21
+00 1
+.names x2 x1 new_n22
+11 1
+.names new_n21 new_n22 p1
+01 1
+.names x1 x0 new_n24
+10 1
+.names x3 new_n24 p0
+11 1
+.names new_n14 new_n16 new_n26
+00 1
+.names new_n24 new_n26 q0
+11 1
+.names p3
+ 0
+.names q3
+ 0
+.names p0 q2
+1 1
+.names p1 q1
+1 1
+.end

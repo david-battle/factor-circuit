@@ -1,0 +1,35 @@
+.model factor4
+.inputs x0 x1 x2 x3
+.outputs p3 p2 p1 p0 q3 q2 q1 q0
+
+.names p3
+
+.names p2
+
+.names x0 x1 x2 x3 p1
+0110 1
+1010 1
+1110 1
+1111 1
+
+.names x0 x1 x2 x3 p0
+1111 1
+
+.names q3
+
+.names x0 x1 x2 x3 q2
+1010 1
+1110 1
+1111 1
+
+.names x0 x1 x2 x3 q1
+0110 1
+1110 1
+
+.names x0 x1 x2 x3 q0
+0110 1
+1010 1
+1110 1
+1111 1
+
+.end

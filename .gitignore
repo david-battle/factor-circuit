@@ -1,0 +1,23 @@
+__pycache__/
+*.pyc
+*.swp
+*.swo
+*.old
+*.key
+
+# ABC binary and build artifacts
+abc/
+
+# Intermediate optimization files
+factor6_opt2.blif
+factor7_opt2.blif
+factor7_opt_opt.blif
+factor7_opt_opt_opt.blif
+factor7_opt_opt_opt_opt.blif
+factor7_opt_opt_opt_opt_opt.blif
+
+# ABC internal files
+abc.history
+
+# Temporary files
+/tmp/
