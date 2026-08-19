@@ -185,7 +185,10 @@ The UB/LB gap is exploding. Both UB and LB need better techniques
 ### What's Left To Do
 
 **High priority:**
-- Incremental SAT for LB binary search
+- ~~Incremental SAT for LB binary search~~ — REJECTED: Most time is spent
+  on higher k values (by an order of magnitude or more), so savings from
+  incremental clause reuse across binary search steps would be minimal.
+  The bottleneck is the encoding size at high k, not the search structure.
 
 **Medium priority:**
 - Larger windows (need smaller window SAT encoding)
@@ -198,3 +201,11 @@ The UB/LB gap is exploding. Both UB and LB need better techniques
 **Tried and failed:**
 - Binary selector encoding: fewer variables and clauses but slower to solve.
   Do not revisit without a fundamentally different approach.
+- Sequential counter (Sinz 2005) for at-most-one: Replaced pairwise O(n²)
+  AMO clauses with O(n) sequential counter in survey.py and
+  exact_factor6_budget.py. Clause count dropped ~37% (e.g., k=10 N=6:
+  30K→19K clauses) but solver got dramatically slower — k=10 for N=6
+  (previously SAT in seconds) failed to complete in 120s. Pairwise AMO's
+  redundant clauses provide free unit propagation that CDCL solvers exploit
+  heavily. Compact AMO encodings weaken propagation and hurt performance
+  more than they help clause count.

@@ -1,5 +1,24 @@
 # Factoring Circuits Project
 
+## ⚠️ DO NOT REVISIT — Rejected Approaches
+
+**Sequential counter (Sinz 2005) for at-most-one encoding:**
+Tried in survey.py and exact_factor6_budget.py. Replaced pairwise O(n²)
+AMO clauses with O(n) sequential counter clauses. Result: clause count
+dropped ~37% but solver got dramatically SLOWER. Pairwise AMO provides
+free unit propagation that CDCL solvers exploit heavily — the sequential
+counter's weaker propagation costs more in search than it saves in clauses.
+**Do not try this or similar compact AMO encodings again.**
+
+**Incremental SAT across binary search steps:**
+Rejected because most time is spent on higher k values (by an order of
+magnitude), so savings from clause reuse would be minimal. The bottleneck
+is encoding size at high k, not the search structure.
+
+**Binary selector encoding (non-one-hot):**
+Tried earlier. Fewer variables and clauses but slower to solve. Do not
+revisit without a fundamentally different approach.
+
 ## Goal
 
 Experimentally investigate whether integer factoring exhibits surprisingly
