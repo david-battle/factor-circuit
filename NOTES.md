@@ -14,9 +14,9 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
 ---|------------|-----|------|------|-------------------------------
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
- 6 |         18 |  10 |   20 |  10  | ABC + ODC windowed resynthesis
- 7 |         37 |  11 |   90 |  79  | ABC + ODC windowed resynthesis
- 8 |         76 |  10 |  347 | 337  | ABC + ODC windowed resynthesis
+ 6 |         18 |  10 |   19 |   9  | ABC + ODC windowed resynthesis
+ 7 |         37 |  11 |   74 |  63  | ABC + ODC windowed resynthesis
+ 8 |         76 |  10 |  208 | 198  | ABC + ODC windowed resynthesis
 ```
 
 ## How We Got Here — Chronological Summary
@@ -61,9 +61,9 @@ SAT-proven optimal replacements.
 4. If found with fewer gates, splice it in and verify.
 5. Repeat hundreds of times.
 
-**N=6 results:** ABC baseline 90 gates → **20 gates** (78% reduction).
+**N=6 results:** ABC baseline 90 gates → **19 gates** (79% reduction).
 
-**N=7 results:** ABC baseline 229 gates → **90 gates** (61% reduction).
+**N=7 results:** ABC baseline 229 gates → **74 gates** (68% reduction).
 
 **Key limitation:** Window size is bounded by SAT encoding size. With 7+
 inputs or 4+ outputs, the SAT solver times out. This is the same one-hot
@@ -209,3 +209,180 @@ The UB/LB gap is exploding. Both UB and LB need better techniques
   redundant clauses provide free unit propagation that CDCL solvers exploit
   heavily. Compact AMO encodings weaken propagation and hurt performance
   more than they help clause count.
+
+## Session: Larger Window Experiment (Aug 19, 2026)
+
+### Motivation
+
+Previous windowed resynthesis used max_inputs=6, max_outputs=3,
+max_gates=15. DESIGN.md noted larger windows cause SAT timeouts due to
+one-hot encoding scaling. Wanted to test whether a modest gate increase
+(max_gates 15→20, same I/O bounds) could find deeper improvements without
+hitting the scaling wall.
+
+### Changes Made
+
+- **`window_opt.py`**: Changed default `max_gates` from 15 to 20 in both
+  `optimize_circuit()` signature and CLI defaults. (Lines 992, 1123.)
+  CLI flags `--max-in`, `--max-out`, `--max-gates` already existed for
+  overriding.
+
+### Results
+
+**N=7 smoke test** (factor7_opt_final.blif, 133 gates):
+- 200 iterations, max_gates=20
+- **133 → 128 AND gates** (5 saved, 4 improvements)
+- No SAT timeouts — all solves completed within budget
+- Improvements found at iterations 10, 51, 101, 154 (small windows:
+  3–6 gates within the 20-gate budget)
+- Conclusion: larger gate budget doesn't cause timeout issues; solver
+  handles it comfortably
+
+**N=8 full run** (factor8_opt_final.blif, 347 gates):
+- 200 iterations, max_gates=20
+- **347 → 346 AND gates** (1 saved, 1 improvement)
+- Nearly every SAT solution failed verification — hundreds of failures,
+  most getting 70–75/76 care points correct but not all
+- The one success was a trivial 5→4 gate reduction at iteration 151
+- Conclusion: the solver finds SAT solutions readily, but they almost
+  all fail post-splice verification
+
+### Diagnosis: Verification Failure Pattern
+
+The systematic nature of the failures (70–75/76 correct, not random)
+suggests a bug or structural issue, not just bad luck. Key observations:
+
+1. SAT solver returns valid models (satisfies all CNF clauses)
+2. Models decode to valid gate circuits
+3. After splice + prune, verify_circuit() reports 70–75/76 correct
+4. The same window with max_gates=15 (previous sessions) also showed
+   frequent verification failures on N=8, but had more successes
+   because the circuit was larger (567→347 over 10 passes)
+
+Possible causes under investigation:
+- **ODC care set over-approximation**: The ODC loop uses `care_set[in].add(out)`
+  (set union across care points sharing an in_pattern). If two care points
+  have the same window-input pattern but different allowed output patterns,
+  the union is larger than the intersection. The SAT solver can then pick
+  a pattern that satisfies one care point but not the other. The correct
+  approach is to intersect allowed sets across care points with the same
+  in_pattern.
+- **eval_order / fanout cone correctness**: The fanout cone traces forward
+  from W_out through BUF/NOT/AND. Nodes in the cone but not in W_out are
+  re-simulated. Need to verify that re-simulated values are consistent
+  with what the spliced circuit actually computes.
+
+A diagnostic script (`diagnose_odc.py`) was written to compare the SAT
+solution's output against the original circuit's output per care point,
+but the session ended before the root cause was conclusively identified.
+
+### Impact Assessment
+
+The verification failure issue predates the max_gates increase — it also
+occurred with max_gates=15 on N=8. The larger gate budget just makes it
+more visible because more SAT solutions are found (and more fail). The
+root cause likely affects all window sizes and all N values, but is masked
+at smaller N where fewer care points share the same in_pattern.
+
+**Next steps:**
+1. Fix the ODC union→intersection bug if confirmed
+2. Re-run N=8 with corrected ODC
+3. Then retry larger windows (max_gates=20+) to see if they help
+
+## Session: ODC Intersection Fix (Aug 19, 2026)
+
+### Root Cause Confirmed and Fixed
+
+The ODC care set over-approximation bug was the primary cause of
+verification failures. When multiple care points share the same
+`in_pattern` (window-input values) but have different global requirements,
+the old code unioned their allowed output sets via `care_set[in].add(out)`.
+This let the SAT solver pick an output valid for one care point but not
+another with the same inputs.
+
+**Fix** (`window_opt.py:317-354`): Collect per-care-point allowed sets in
+`per_point[in_pattern][(x,p,q)]`, then intersect across care points:
+```python
+care_set[in_pattern] = sets[0].intersection(*sets[1:])
+```
+
+### Results — Dramatic Improvement
+
+Re-ran windowed resynthesis with corrected ODC on all N values:
+
+**N=6** (factor6_opt_final.blif, 90 gates):
+- 200 iterations, max_gates=25
+- **90 → 19 AND gates** (79% reduction, 20 improvements)
+- Previous best was 20 (off by 1)
+
+**N=7** (factor7_opt_final.blif, 133 gates):
+- Pass 1 (seed=42, 200 iter): 133 → 80 (34 improvements)
+- Pass 2 (seed=999, 300 iter): 80 → 74 (5 improvements)
+- Pass 3 (seed=5555, 300 iter): 74 → 74 (0 improvements, plateau)
+- **Final: 74 AND gates** (44% reduction from previous best of 90)
+
+**N=8** (factor8_opt_final.blif, 347 gates):
+- Pass 1 (seed=42, 200 iter, max_gates=20): 347 → 240 (56 improvements)
+- Pass 2 (seed=1337, 200 iter, max_gates=30, max_out=4): 240 → 227 (9)
+- Pass 3 (seed=2026, 200 iter, max_gates=30, max_out=4): 227 → 212 (9)
+- Pass 4 (seed=314, 200 iter): 212 → 209 (3)
+- Pass 5 (seed=7777, 300 iter): 209 → 208 (1, plateau)
+- **Final: 208 AND gates** (40% reduction from previous best of 347)
+
+### Updated Results Table
+
+```
+N  | Semiprimes | LB  | UB   | Gap  | UB Source
+---|------------|-----|------|------|-------------------------------
+ 4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
+ 5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
+ 6 |         18 |  10 |   19 |   9  | ABC + corrected ODC windowed resynth
+ 7 |         37 |  11 |   74 |  63  | ABC + corrected ODC windowed resynth
+ 8 |         76 |  10 |  208 | 198  | ABC + corrected ODC windowed resynth
+```
+
+### Key Observations
+
+1. **The intersection fix was critical.** Pre-fix, nearly every SAT
+   solution on N=8 failed verification (70-75/76 correct). Post-fix,
+   56 out of ~200 iterations produced verified improvements.
+
+2. **Larger windows help with corrected ODC.** Bumping max_gates to 30
+   and max_out to 4 found improvements that smaller windows missed,
+   though with diminishing returns.
+
+3. **N=7 improved more than N=8 proportionally.** N=7 went from 90→74
+   (18% improvement) while N=8 went from 347→208 (40% improvement).
+   The bug disproportionately affected N=8 because more care points
+   share the same in_pattern (76 vs 37).
+
+4. **Still some verification failures remain** (e.g. 75/76, 73/76
+   correct). These are correctly rejected. They represent cases where
+   the SAT solver finds a valid circuit for the CNF but the splice
+   introduces subtle interactions with downstream gates. The rate of
+   failures is much lower than before the fix.
+
+### What's Left To Do
+
+**High priority:**
+- ~~Incremental SAT for LB binary search~~ — REJECTED.
+- Run N=9, N=10 UB surveys (zero implementation effort)
+
+**Medium priority:**
+- Even larger windows (max_inputs=7+ requires smaller SAT encoding)
+- Investigate remaining verification failures (75/76 correct patterns)
+
+**Low priority:**
+- Investigate growth rate of UB/LB with N
+- Depth optimization (currently only gate count)
+- N=6 LB proving (gap is now only 9 — might be provable with better encoding)
+
+**Tried and failed:**
+- Binary selector encoding: fewer variables and clauses but slower to solve.
+  Do not revisit without a fundamentally different approach.
+- Sequential counter (Sinz 2005) for at-most-one: Replaced pairwise O(n²)
+  AMO clauses with O(n) sequential counter. Clause count dropped ~37%
+  but solver got dramatically slower. Pairwise AMO's redundant clauses
+  provide free unit propagation that CDCL solvers exploit heavily.
+  Compact AMO encodings weaken propagation and hurt performance more
+  than they help clause count.

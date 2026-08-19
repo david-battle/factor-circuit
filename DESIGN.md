@@ -118,16 +118,26 @@ python3 window_opt.py <blif> [N] [iterations] [--sdc] [--seed S] \
 ```
 
 Defaults: N=6, 200 iterations, ODC mode, max_inputs=6, max_outputs=3,
-max_gates=15.
+max_gates=20.
 
-### Status: ODC Fixed
+### Status: ODC Fixed (two bugs)
 
-**ODC mode — fixed.** The previous bug was that the fanout-cone re-simulation
-excluded W_gates from `eval_order`, so downstream nodes that depended on both
-W_out and a W_gate were re-simulated with stale W_gate values. Fix: include
-W_gates in `eval_order` (they re-evaluate with the new W_out values, giving
-correct inputs to downstream nodes). Validated by brute-force comparison on 20
-random windows (N=6, all matched).
+**Bug 1 — W_gates in eval_order:** The fanout-cone re-simulation excluded
+W_gates from `eval_order`, so downstream nodes that depended on both W_out
+and a W_gate were re-simulated with stale W_gate values. Fix: include
+W_gates in `eval_order`. Validated by brute-force comparison on 20 random
+windows (N=6, all matched).
+
+**Bug 2 — care set over-approximation:** When multiple care points share
+the same `in_pattern` (window-input values) but have different global
+requirements, the old code unioned their allowed output sets via
+`care_set[in].add(out)`. This let the SAT solver pick an output valid for
+one care point but not another. Fix (`window_opt.py:317-354`): collect
+per-care-point allowed sets, then intersect:
+`care_set[in_pattern] = sets[0].intersection(*sets[1:])`.
+
+Impact of Bug 2 fix: N=8 UB dropped from 347 → 208 gates (40%); N=7 from
+90 → 74 gates (18%); N=6 from 20 → 19 gates (5%).
 
 ---
 
@@ -190,24 +200,28 @@ Established LB=10 for N=6 (k=10 SAT, k=9 UNSAT).
 takes longer to solve. Do not revisit without a fundamentally different
 approach.
 
-## Unimplemented: Incremental SAT for LB
+## Rejected: Incremental SAT for LB
 
 Currently `survey.py` rebuilds the entire CNF from scratch for each k.
-python-sat supports incremental solving. A circuit with k gates is a strict
-superset of k-1 gates — add one gate's variables/clauses and re-solve
-without losing learned clauses.
+python-sat supports incremental solving. However, this was rejected: most
+time is spent on higher k values (by an order of magnitude), so savings
+from clause reuse across binary search steps would be minimal. The
+bottleneck is encoding size at high k, not the search structure.
 
-Expected impact: Much faster LB binary search, especially for UNSAT proofs
-where learned clauses at k transfer to k+1.
+## Implemented: Larger Windows
 
-## Unimplemented: Larger Windows
+Default window size is now 6 inputs, 4 outputs, 30 gates. The corrected
+ODC care set (intersection instead of union) prevents verification failures
+that previously plagued larger windows. Larger windows find deeper
+optimizations: N=8 dropped from 347 → 208 gates with max_gates=30,
+max_out=4. Typical solve times remain under 1s per window.
 
-Current window size (6 inputs, 3 outputs, 15 gates) limits optimization.
-Larger windows (7+ inputs, 4+ outputs) cause SAT timeouts due to one-hot
-encoding scaling. Requires binary selector encoding (above).
+Even larger windows (7+ inputs) still cause SAT timeouts due to one-hot
+encoding scaling.
 
-## Unimplemented: Higher N
+## Partially Implemented: Higher N
 
-Run survey.py at N=8 (76 semiprimes), N=9 (149), N=10. UB phase works;
-LB will hit walls early but even partial LBs are useful for growth-rate
-analysis.
+N=8 survey completed: 535 gates from ABC, reduced to 208 via windowed
+resynthesis. LB=10 (same one-hot clause wall as N=7). N=9 and N=10
+surveys not yet run. UB phase works; LB will hit walls early but even
+partial LBs are useful for growth-rate analysis.

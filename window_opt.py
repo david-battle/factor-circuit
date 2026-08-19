@@ -314,6 +314,9 @@ def get_window_care_set(aig, W_in, W_out, W_gates, care_points, N, use_odc=True)
     # downstream nodes that depend on both W_out and W_gates).
     eval_order = [n for n in topo if n in fanout_cone and n not in W_out]
 
+    # Collect per-care-point allowed sets, then intersect for each in_pattern
+    per_point = defaultdict(lambda: defaultdict(set))
+
     for (x, p, q) in care_points:
         input_vals = {f"x{i}": (x >> i) & 1 for i in range(N)}
         base_vals = aig.simulate(input_vals)
@@ -343,7 +346,12 @@ def get_window_care_set(aig, W_in, W_out, W_gates, care_points, N, use_odc=True)
                     break
 
             if ok:
-                care_set[in_pattern].add(out_pattern)
+                per_point[in_pattern][(x, p, q)].add(out_pattern)
+
+    # Intersect: for each in_pattern, keep only out_patterns valid for ALL care points
+    for in_pattern, point_map in per_point.items():
+        sets = list(point_map.values())
+        care_set[in_pattern] = sets[0].intersection(*sets[1:]) if len(sets) > 1 else sets[0]
 
     return care_set
 
@@ -989,7 +997,7 @@ def enumerate_care(N):
 
 
 def optimize_circuit(aig, care_points, N, num_iterations=200, seed=42,
-                     max_inputs=6, max_outputs=3, max_gates=15, verbose=True,
+                     max_inputs=6, max_outputs=3, max_gates=20, verbose=True,
                      use_odc=True):
     """Main optimization loop."""
     random.seed(seed)
@@ -1120,7 +1128,7 @@ if __name__ == "__main__":
     use_odc = True
     max_inputs = 6
     max_outputs = 3
-    max_gates = 15
+    max_gates = 20
     for i, arg in enumerate(sys.argv):
         if arg == '--seed' and i + 1 < len(sys.argv):
             seed = int(sys.argv[i + 1])
