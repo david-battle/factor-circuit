@@ -184,19 +184,11 @@ Established LB=10 for N=6 (k=10 SAT, k=9 UNSAT).
 
 ---
 
-## Unimplemented: Binary Selector Encoding
+## Tried and Failed: Binary Selector Encoding
 
-The one-hot source selector is the main scalability bottleneck. For a gate
-with s possible sources, one-hot uses s variables + s(s-1)/2 AMO clauses.
-Binary encoding uses ceil(log2(s)) variables instead.
-
-For k=20 with N=7 (s=28): 5 variables vs 28 per selector, eliminating the
-quadratic AMO blowup. Tradeoff: more complex propagation clauses, but total
-clause count drops substantially.
-
-Expected impact: Push LB from 11 to ~15-20 for N=7. Make N=8+ LB tractable.
-Also enables larger windows in window_opt.py (currently limited by SAT
-encoding size).
+**Result:** Fewer variables and clauses than one-hot, but the SAT solver
+takes longer to solve. Do not revisit without a fundamentally different
+approach.
 
 ## Unimplemented: Incremental SAT for LB
 

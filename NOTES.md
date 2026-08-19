@@ -16,6 +16,7 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
  6 |         18 |  10 |   20 |  10  | ABC + ODC windowed resynthesis
  7 |         37 |  11 |   90 |  79  | ABC + ODC windowed resynthesis
+ 8 |         76 |  10 |  347 | 337  | ABC + ODC windowed resynthesis
 ```
 
 ## How We Got Here — Chronological Summary
@@ -117,16 +118,83 @@ re-simulation.
 4. **ABC is good but not optimal.** ABC's global heuristics find decent
    circuits (229 for N=7) but windowed resynthesis can cut them by 61-78%.
 
-## What's Left To Do
+## Session: N=8 Attempt (Aug 19, 2026 ~12:13)
+
+Started N=8 exploration. 76 semiprimes to factor.
+
+### N=8 UB Survey
+
+Running `survey.py 8 600 60` to get initial ABC upper bound.
+76 semiprimes, 256 total inputs. Don't-care ratio: 76/256 = 29.7%.
+
+**Result: UB=535 AND gates.** ABC plateaued at 535 for all 172 rounds
+with alternating dch/dc2 pipeline. No improvement over 10 minutes.
+
+### N=8 LB Attempt
+
+SAT binary search with one-hot encoding:
+- k=0..10: UNSAT (proven, k=10 took 2.5s)
+- k=11: TIMEOUT (clause wall hit)
+
+**Result: LB=10.** Same wall as N=7 — one-hot encoding scales O(k^2 * C)
+and k=11 exceeds budget at ~50K clauses.
+
+### N=8 Windowed Resynthesis
+
+Now running `window_opt.py` on the best ABC BLIF to try to improve UB from 535.
+
+**Results (10 passes, diminishing returns):**
+
+| Pass | Seed | Gates | Saved |
+|------|------|-------|-------|
+| ABC baseline | — | 567 | — |
+| 1 | 42 | 419 | 148 |
+| 2 | 123 | 399 | 20 |
+| 3 | 777 | 386 | 13 |
+| 4 | 999 | 375 | 11 |
+| 5 | 2026 | 373 | 2 |
+| 6 | 4242 | 362 | 11 |
+| 7 | 314 | 351 | 11 |
+| 8 | 1337 | 351 | 0 |
+| 9 | 2718 | 349 | 2 |
+| 10 | 5555 | 347 | 2 |
+
+**Final UB: 347 AND gates** (39% reduction from ABC baseline of 567).
+Note: ABC raw output was 535 gates, but strash to 2-input AIG inflated to 567.
+
+### N=8 Summary
+
+```
+N=8 | LB=10 | UB=347 | gap=337
+```
+
+Comparison with smaller N:
+```
+N  | Semiprimes | LB  | UB   | Gap  | UB Source
+---|------------|-----|------|------|-------------------------------
+ 4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
+ 5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
+ 6 |         18 |  10 |   20 |  10  | ABC + ODC windowed resynthesis
+ 7 |         37 |  11 |   90 |  79  | ABC + ODC windowed resynthesis
+ 8 |         76 |  10 |  347 | 337  | ABC + ODC windowed resynthesis
+```
+
+The UB/LB gap is exploding. Both UB and LB need better techniques
+(binary selector encoding) to make progress.
+
+### What's Left To Do
 
 **High priority:**
-- Binary selector encoding (for both LB and window SAT) — biggest leverage
 - Incremental SAT for LB binary search
 
 **Medium priority:**
-- Larger windows (need binary selectors first)
-- Run N=8, N=9 UB surveys (zero implementation effort)
+- Larger windows (need smaller window SAT encoding)
+- Run N=9, N=10 UB surveys (zero implementation effort)
 
 **Low priority:**
 - Investigate growth rate of UB/LB with N
 - Depth optimization (currently only gate count)
+
+**Tried and failed:**
+- Binary selector encoding: fewer variables and clauses but slower to solve.
+  Do not revisit without a fundamentally different approach.

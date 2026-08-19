@@ -29,10 +29,12 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
  6 |         18 |  10 |   20 |  10  | ABC + ODC windowed resynthesis
  7 |         37 |  11 |   90 |  79  | ABC + ODC windowed resynthesis
+ 8 |         76 |  10 |  347 | 337  | ABC + ODC windowed resynthesis
 ```
 
 LBs for N=4,5 from full SAT proof. LBs for N=6,7 from `survey.py` SAT
-encoding with one-hot selectors (~50K clause wall at k=12).
+encoding with one-hot selectors (~50K clause wall at k=11+).
+UBs for N=6-8 from ABC + multi-pass windowed resynthesis (ODC mode).
 
 ## Tools
 
@@ -54,6 +56,7 @@ encoding with one-hot selectors (~50K clause wall at k=12).
 | `factor6_opt_final_opt.blif` | N=6 after windowed resynthesis (20 AND gates). |
 | `factor7_opt.blif` | N=7 ABC-optimized baseline (229 AND gates). |
 | `factor7_opt_final.blif` | N=7 ABC pipeline baseline (133 AND gates). |
+| `factor8_opt_final.blif` | N=8 after windowed resynthesis (347 AND gates). |
 
 ## Bit-Ordering Convention
 
