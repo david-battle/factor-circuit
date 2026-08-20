@@ -229,6 +229,7 @@ encoding scaling.
 ## Partially Implemented: Higher N
 
 N=8 survey completed: 535 gates from ABC, reduced to 208 via windowed
-resynthesis. LB=10 (same one-hot clause wall as N=7). N=9 and N=10
-surveys not yet run. UB phase works; LB will hit walls early but even
-partial LBs are useful for growth-rate analysis.
+resynthesis. LB=10 (same one-hot clause wall as N=7). N=9 UB survey
+completed: 1158 gates from ABC, reduced to 503 via windowed resynthesis
+(57% reduction). N=10 not yet run. UB phase works; LB will hit walls early
+but even partial LBs are useful for growth-rate analysis.

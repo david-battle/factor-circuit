@@ -1,0 +1,1670 @@
+.model factor
+.inputs x8 x7 x6 x5 x4 x3 x2 x1 x0
+.outputs p8 p7 p6 p5 p4 p3 p2 p1 p0 q8 q7 q6 q5 q4 q3 q2 q1 q0
+.names p8
+0
+.names p7
+0
+.names p6
+0
+.names p5
+0
+.names x0 x8 win_132_g0
+11 1
+.names win_132_g0 new_n29
+1 1
+.names x7 x6 new_n30
+10 1
+.names x3 x4 win_155_g0
+01 1
+.names x3 x8 win_68_g1
+11 1
+.names win_68_g1 new_n168
+1 1
+.names x5 new_n168 win_62_g1
+01 1
+.names x1 win_62_g1 win_62_g2
+10 1
+.names win_155_g0 win_62_g2 win_74_g0
+10 1
+.names win_74_g0 win_155_g1
+1 1
+.names win_155_g1 win_101_g2
+1 1
+.names win_101_g2 new_n34
+1 1
+.names new_n30 new_n34 new_n35
+11 1
+.names x5 x6 win_50_g5
+01 1
+.names win_50_g5 win_28_g0
+1 1
+.names win_28_g0 win_154_g0
+1 1
+.names x2 win_154_g0 win_154_g1
+01 1
+.names x1 x7 win_194_g0
+10 1
+.names win_154_g1 win_194_g0 win_192_g2
+11 1
+.names win_192_g2 win_154_g2
+1 1
+.names win_154_g2 win_14_g0
+1 1
+.names win_14_g0 new_n40
+1 1
+.names x2 x7 win_50_g2
+11 1
+.names win_50_g2 win_6_g0
+1 1
+.names x1 x3 win_26_g0
+10 1
+.names x1 x3 win_90_g1
+01 1
+.names win_26_g0 win_90_g1 win_124_g1
+00 1
+.names win_124_g1 win_26_g1
+1 1
+.names win_6_g0 win_26_g1 win_26_g2
+10 1
+.names win_26_g2 new_n52
+1 1
+.names new_n52 new_n53
+1 1
+.names new_n40 new_n53 new_n54
+00 1
+.names x4 new_n54 new_n55
+00 1
+.names new_n35 new_n55 new_n56
+00 1
+.names new_n29 new_n56 p4
+10 1
+.names x3 x5 win_179_g2
+11 1
+.names win_194_g0 win_179_g2 win_179_g5
+11 1
+.names win_179_g5 win_127_g4
+1 1
+.names win_127_g4 win_76_g1
+1 1
+.names win_76_g1 new_n68
+1 1
+.names x7 new_n73
+1 1
+.names x1 x5 win_181_g3
+01 1
+.names win_181_g3 new_n32
+1 1
+.names x4 x3 new_n176
+00 1
+.names x4 x3 new_n177
+11 1
+.names new_n176 new_n177 new_n178
+00 1
+.names x2 x3 win_189_g1
+01 1
+.names win_189_g1 new_n104
+1 1
+.names x2 x4 win_13_g0
+11 1
+.names win_13_g0 win_149_g0
+1 1
+.names win_149_g0 new_n160
+1 1
+.names new_n104 new_n160 new_n345
+00 1
+.names new_n178 new_n345 new_n346
+10 1
+.names new_n32 new_n346 new_n529
+11 1
+.names x4 x5 win_95_g0
+00 1
+.names x1 win_95_g0 win_173_g0
+01 1
+.names x7 x4 new_n680
+00 1
+.names x1 new_n680 win_137_g0
+11 1
+.names x8 win_137_g0 win_75_g0
+11 1
+.names x5 win_75_g0 win_75_g2
+11 1
+.names win_173_g0 win_75_g2 win_75_g3
+00 1
+.names x6 win_75_g3 win_128_g1
+00 1
+.names x2 x3 win_48_g2
+11 1
+.names win_48_g2 new_n116
+1 1
+.names x2 x3 win_45_g1
+00 1
+.names new_n116 win_45_g1 win_157_g0
+00 1
+.names win_128_g1 win_157_g0 win_199_g1
+01 1
+.names win_199_g1 win_145_g2
+1 1
+.names win_145_g2 win_171_g4
+1 1
+.names win_171_g4 win_157_g1
+1 1
+.names win_157_g1 new_n117
+1 1
+.names x1 win_95_g0 win_189_g3
+00 1
+.names win_189_g3 win_70_g0
+1 1
+.names new_n117 win_70_g0 win_70_g1
+10 1
+.names new_n529 win_70_g1 win_172_g0
+00 1
+.names x6 win_172_g0 win_172_g2
+11 1
+.names new_n73 win_172_g2 win_172_g3
+11 1
+.names win_172_g3 win_163_g2
+1 1
+.names win_163_g2 win_61_g1
+1 1
+.names win_61_g1 new_n74
+1 1
+.names new_n68 new_n74 new_n75
+00 1
+.names x2 x8 win_30_g0
+01 1
+.names new_n75 win_30_g0 win_30_g1
+01 1
+.names win_30_g1 new_n76
+1 1
+.names x7 win_132_g0 win_132_g1
+10 1
+.names win_132_g1 win_58_g0
+1 1
+.names win_58_g0 new_n77
+1 1
+.names x6 new_n77 new_n78
+01 1
+.names x1 win_16_g1
+1 1
+.names win_16_g1 new_n80
+1 1
+.names new_n78 new_n80 new_n81
+11 1
+.names new_n76 new_n81 new_n82
+00 1
+.names x4 new_n82 new_n83
+00 1
+.names x5 x3 new_n85
+11 1
+.names x1 x2 win_32_g0
+10 1
+.names new_n85 win_32_g0 win_169_g0
+11 1
+.names x7 win_169_g0 win_169_g3
+10 1
+.names win_169_g3 win_72_g0
+1 1
+.names win_72_g0 new_n84
+1 1
+.names new_n84 new_n85 new_n86
+01 1
+.names x3 x8 win_126_g1
+01 1
+.names win_126_g1 win_22_g1
+1 1
+.names win_22_g1 win_165_g0
+1 1
+.names win_165_g0 win_97_g2
+1 1
+.names win_97_g2 win_88_g2
+1 1
+.names win_88_g2 win_46_g0
+1 1
+.names win_46_g0 new_n87
+1 1
+.names x7 new_n32 win_130_g0
+00 1
+.names x5 win_130_g0 win_130_g2
+00 1
+.names win_130_g2 win_19_g2
+1 1
+.names win_19_g2 win_3_g0
+1 1
+.names win_3_g0 win_12_g0
+1 1
+.names win_12_g0 new_n88
+1 1
+.names new_n87 new_n88 new_n89
+11 1
+.names new_n86 new_n89 new_n90
+00 1
+.names x1 x7 win_178_g1
+11 1
+.names win_178_g1 new_n91
+1 1
+.names x2 x6 win_130_g1
+00 1
+.names win_130_g1 win_19_g1
+1 1
+.names win_19_g1 new_n92
+1 1
+.names new_n91 new_n92 new_n93
+11 1
+.names x3 x7 win_68_g0
+00 1
+.names win_62_g2 win_68_g0 win_74_g1
+10 1
+.names win_74_g0 win_74_g1 win_74_g3
+00 1
+.names win_74_g3 win_155_g2
+1 1
+.names x6 win_155_g2 win_128_g0
+00 1
+.names x2 win_128_g0 win_128_g2
+11 1
+.names win_128_g2 new_n95
+1 1
+.names new_n95 new_n96
+1 1
+.names new_n93 new_n96 new_n97
+00 1
+.names x4 new_n97 new_n98
+10 1
+.names new_n90 new_n98 new_n99
+01 1
+.names x6 x4 new_n100
+11 1
+.names x3 x6 win_197_g1
+10 1
+.names x2 win_197_g1 win_148_g0
+10 1
+.names x8 win_148_g0 win_124_g2
+10 1
+.names x7 win_124_g2 win_124_g5
+00 1
+.names win_124_g5 win_148_g2
+1 1
+.names x5 x4 new_n668
+11 1
+.names new_n668 win_95_g0 win_158_g0
+00 1
+.names win_148_g2 win_158_g0 win_53_g0
+11 1
+.names x5 x7 win_53_g2
+11 1
+.names win_189_g1 win_53_g2 win_53_g3
+10 1
+.names win_53_g0 win_53_g3 win_53_g4
+00 1
+.names win_53_g4 win_162_g2
+1 1
+.names win_162_g2 win_139_g3
+1 1
+.names win_139_g3 win_44_g3
+1 1
+.names x8 win_44_g3 win_44_g4
+10 1
+.names win_44_g4 new_n111
+1 1
+.names x3 x5 win_66_g0
+01 1
+.names win_132_g1 win_66_g0 win_66_g3
+11 1
+.names win_66_g3 win_87_g1
+1 1
+.names win_87_g1 new_n115
+1 1
+.names x7 x1 new_n64
+10 1
+.names x8 new_n64 new_n118
+01 1
+.names new_n118 new_n119
+1 1
+.names new_n117 new_n119 new_n120
+01 1
+.names new_n115 new_n120 new_n121
+00 1
+.names new_n111 new_n121 new_n122
+01 1
+.names new_n100 new_n122 new_n123
+10 1
+.names new_n99 new_n123 new_n124
+00 1
+.names new_n83 new_n124 new_n125
+01 1
+.names x0 new_n125 p3
+10 1
+.names x7 x8 win_124_g4
+01 1
+.names win_124_g4 win_136_g1
+1 1
+.names win_136_g1 win_2_g0
+1 1
+.names win_2_g0 new_n127
+1 1
+.names x6 new_n128
+0 1
+.names win_26_g1 new_n51
+1 1
+.names x2 x5 win_96_g1
+10 1
+.names win_96_g1 win_147_g3
+1 1
+.names win_147_g3 win_16_g0
+1 1
+.names win_16_g0 new_n79
+1 1
+.names x5 x2 new_n129
+10 1
+.names new_n79 new_n129 new_n130
+00 1
+.names new_n51 new_n130 new_n131
+01 1
+.names win_169_g0 win_32_g1
+1 1
+.names win_32_g1 new_n133
+1 1
+.names new_n131 new_n133 new_n134
+00 1
+.names new_n128 new_n134 new_n135
+10 1
+.names x3 x5 win_108_g0
+10 1
+.names new_n129 win_108_g0 win_108_g1
+00 1
+.names x4 win_108_g1 win_108_g2
+10 1
+.names win_108_g2 win_29_g3
+1 1
+.names win_29_g3 win_33_g0
+1 1
+.names win_33_g0 new_n140
+1 1
+.names new_n135 new_n140 new_n141
+00 1
+.names new_n127 new_n141 new_n142
+10 1
+.names x6 x8 win_50_g0
+00 1
+.names x4 win_50_g0 win_50_g1
+00 1
+.names x2 win_50_g1 win_50_g4
+01 1
+.names win_50_g4 win_183_g3
+1 1
+.names win_183_g3 win_121_g0
+1 1
+.names win_121_g0 win_56_g1
+1 1
+.names win_56_g1 new_n155
+1 1
+.names x3 new_n155 new_n156
+11 1
+.names x3 x8 win_97_g3
+10 1
+.names win_97_g2 win_97_g3 win_97_g4
+00 1
+.names x6 win_97_g4 win_174_g2
+11 1
+.names new_n156 win_174_g2 win_174_g3
+00 1
+.names win_19_g1 win_97_g4 win_98_g0
+10 1
+.names new_n129 win_98_g0 win_98_g2
+01 1
+.names win_174_g3 win_98_g2 win_98_g3
+10 1
+.names x2 x4 win_112_g0
+01 1
+.names x5 win_112_g0 win_150_g0
+00 1
+.names win_68_g1 win_150_g0 win_150_g2
+11 1
+.names win_98_g3 win_150_g2 win_150_g3
+10 1
+.names win_178_g1 win_150_g3 win_150_g4
+10 1
+.names win_150_g4 win_178_g2
+1 1
+.names x6 x1 new_n41
+10 1
+.names x1 x6 win_80_g0
+10 1
+.names win_80_g0 new_n42
+1 1
+.names new_n41 new_n42 new_n43
+00 1
+.names x2 x4 win_164_g0
+10 1
+.names win_112_g0 win_164_g0 win_164_g3
+00 1
+.names win_164_g3 win_180_g1
+1 1
+.names new_n43 win_180_g1 win_65_g1
+01 1
+.names win_65_g1 win_122_g1
+1 1
+.names x3 x8 win_177_g0
+00 1
+.names win_177_g0 win_99_g0
+1 1
+.names x7 win_99_g0 win_122_g0
+01 1
+.names new_n43 win_122_g0 win_122_g2
+00 1
+.names win_122_g1 win_122_g2 win_122_g3
+10 1
+.names win_122_g3 win_178_g3
+1 1
+.names win_178_g2 win_178_g3 win_178_g4
+00 1
+.names win_178_g4 new_n174
+1 1
+.names new_n142 new_n174 new_n175
+01 1
+.names x5 win_132_g1 win_138_g1
+11 1
+.names x5 x8 win_138_g2
+01 1
+.names win_138_g1 win_138_g2 win_138_g3
+00 1
+.names new_n178 win_138_g3 win_152_g2
+01 1
+.names win_152_g2 win_7_g0
+0 1
+.names win_7_g0 new_n185
+1 1
+.names x6 new_n185 new_n186
+10 1
+.names x5 x1 new_n71
+00 1
+.names new_n71 win_180_g1 win_107_g0
+00 1
+.names x6 win_107_g0 win_107_g1
+11 1
+.names x6 win_107_g0 win_107_g2
+00 1
+.names win_107_g1 win_107_g2 win_107_g3
+00 1
+.names x3 win_107_g3 win_179_g0
+00 1
+.names x3 win_107_g3 win_179_g1
+11 1
+.names win_179_g0 win_179_g1 win_179_g7
+00 1
+.names win_179_g7 win_175_g0
+1 1
+.names x8 win_175_g0 win_175_g1
+01 1
+.names x4 x8 win_175_g3
+01 1
+.names win_175_g1 win_175_g3 win_175_g4
+00 1
+.names win_175_g4 win_48_g1
+0 1
+.names win_48_g1 new_n192
+1 1
+.names new_n130 new_n192 new_n193
+00 1
+.names x4 x6 win_185_g3
+10 1
+.names win_185_g3 win_159_g1
+1 1
+.names win_159_g1 win_33_g1
+1 1
+.names win_33_g1 win_66_g0 win_66_g1
+10 1
+.names new_n193 win_66_g1 win_66_g2
+00 1
+.names win_66_g2 win_87_g3
+1 1
+.names win_87_g3 win_81_g1
+1 1
+.names win_81_g1 new_n202
+1 1
+.names new_n186 new_n202 new_n203
+01 1
+.names new_n64 new_n203 new_n204
+10 1
+.names x3 x5 win_90_g0
+10 1
+.names win_66_g0 win_90_g1 win_90_g2
+00 1
+.names win_90_g0 win_90_g2 win_90_g3
+01 1
+.names x1 x4 win_90_g4
+01 1
+.names win_90_g3 win_90_g4 win_90_g5
+00 1
+.names win_90_g5 win_73_g1
+0 1
+.names win_73_g1 win_23_g0
+1 1
+.names x6 x7 win_23_g1
+10 1
+.names win_23_g0 win_23_g1 win_23_g2
+01 1
+.names new_n204 win_23_g2 win_23_g3
+00 1
+.names win_23_g3 new_n225
+1 1
+.names new_n175 new_n225 new_n226
+11 1
+.names x0 new_n226 p2
+10 1
+.names x4 win_68_g1 win_186_g1
+11 1
+.names x0 x1 win_186_g2
+11 1
+.names win_186_g1 win_186_g2 win_186_g3
+01 1
+.names win_186_g3 new_n238
+1 1
+.names x6 x7 win_153_g0
+00 1
+.names win_153_g0 win_41_g1
+1 1
+.names win_41_g1 new_n343
+0 1
+.names new_n178 new_n343 new_n344
+00 1
+.names x2 x4 win_164_g4
+11 1
+.names x6 win_164_g4 win_164_g5
+01 1
+.names win_164_g5 new_n367
+1 1
+.names x1 new_n367 new_n368
+10 1
+.names new_n344 new_n368 new_n369
+00 1
+.names new_n238 new_n369 new_n370
+00 1
+.names x1 x3 win_111_g1
+10 1
+.names x2 win_111_g1 win_143_g0
+11 1
+.names x2 x8 win_143_g1
+10 1
+.names new_n680 win_143_g1 win_143_g2
+00 1
+.names win_122_g2 win_143_g2 win_143_g3
+00 1
+.names win_143_g0 win_143_g3 win_143_g4
+01 1
+.names win_143_g4 win_134_g2
+1 1
+.names win_134_g2 win_111_g5
+1 1
+.names x2 x3 win_156_g0
+10 1
+.names win_180_g1 win_150_g1
+1 1
+.names win_150_g1 win_112_g2
+1 1
+.names x8 win_112_g2 win_156_g1
+11 1
+.names x1 win_156_g1 win_156_g2
+10 1
+.names win_156_g0 win_156_g2 win_156_g3
+10 1
+.names win_156_g3 win_105_g3
+1 1
+.names win_105_g3 new_n290
+0 1
+.names x1 win_68_g1 win_186_g0
+01 1
+.names win_186_g0 win_68_g2
+1 1
+.names x7 win_68_g2 win_68_g3
+10 1
+.names win_68_g3 win_84_g0
+1 1
+.names new_n290 win_84_g0 win_84_g1
+11 1
+.names win_111_g5 win_84_g1 win_120_g1
+00 1
+.names x6 x7 win_42_g0
+11 1
+.names x2 win_42_g0 win_42_g2
+01 1
+.names x4 win_0_g3
+1 1
+.names win_0_g3 new_n257
+1 1
+.names x2 x6 win_151_g1
+11 1
+.names win_151_g1 new_n258
+1 1
+.names x7 new_n258 new_n259
+01 1
+.names x6 new_n259 win_42_g1
+10 1
+.names win_42_g1 new_n261
+1 1
+.names new_n257 new_n261 new_n262
+00 1
+.names x5 win_128_g2 win_128_g3
+00 1
+.names win_128_g3 win_82_g0
+1 1
+.names new_n262 win_82_g0 win_82_g1
+01 1
+.names win_138_g2 win_82_g1 win_82_g2
+00 1
+.names win_42_g2 win_82_g2 win_82_g3
+00 1
+.names win_82_g3 win_120_g2
+1 1
+.names win_120_g1 win_120_g2 win_120_g3
+01 1
+.names x0 win_120_g3 win_120_g4
+11 1
+.names x2 x7 win_65_g2
+00 1
+.names x6 x7 win_65_g0
+00 1
+.names win_65_g0 win_65_g1 win_65_g3
+00 1
+.names win_65_g2 win_65_g3 win_65_g4
+00 1
+.names win_65_g4 win_115_g4
+1 1
+.names win_115_g4 win_103_g3
+0 1
+.names win_103_g3 win_18_g3
+0 1
+.names win_18_g3 new_n393
+0 1
+.names new_n168 new_n393 new_n394
+10 1
+.names x6 x8 win_174_g0
+01 1
+.names x6 x8 win_196_g0
+10 1
+.names win_174_g0 win_196_g0 win_196_g2
+00 1
+.names win_196_g2 win_174_g1
+1 1
+.names win_174_g1 win_155_g0 win_155_g3
+01 1
+.names win_155_g3 new_n395
+1 1
+.names win_112_g0 win_89_g0
+1 1
+.names win_89_g0 new_n144
+1 1
+.names win_174_g0 new_n152
+1 1
+.names new_n152 new_n155 new_n396
+11 1
+.names new_n144 new_n396 new_n397
+00 1
+.names new_n395 new_n397 new_n398
+00 1
+.names new_n398 new_n400
+0 1
+.names win_196_g0 win_131_g4
+1 1
+.names win_131_g4 win_24_g0
+1 1
+.names x3 win_24_g0 win_24_g2
+10 1
+.names new_n400 win_24_g2 win_24_g3
+00 1
+.names win_24_g3 new_n404
+1 1
+.names x1 x4 win_29_g0
+01 1
+.names win_19_g1 win_97_g4 win_29_g2
+01 1
+.names win_29_g0 win_29_g2 win_29_g4
+10 1
+.names win_29_g4 win_98_g0 win_98_g1
+10 1
+.names win_98_g1 win_119_g3
+1 1
+.names win_119_g3 new_n408
+1 1
+.names new_n404 new_n408 new_n409
+00 1
+.names new_n394 new_n409 new_n410
+01 1
+.names win_164_g0 win_180_g0
+1 1
+.names win_180_g0 win_47_g1
+1 1
+.names win_47_g1 new_n371
+1 1
+.names win_6_g0 new_n48
+1 1
+.names x4 x7 win_103_g4
+01 1
+.names win_103_g4 new_n373
+1 1
+.names new_n48 new_n373 new_n374
+00 1
+.names x6 new_n374 win_175_g2
+00 1
+.names win_175_g2 win_27_g2
+1 1
+.names x1 x2 win_140_g2
+00 1
+.names x1 x2 win_140_g3
+11 1
+.names win_140_g2 win_140_g3 win_140_g4
+00 1
+.names win_140_g4 win_199_g2
+1 1
+.names win_199_g2 win_27_g3
+1 1
+.names win_27_g2 win_27_g3 win_27_g4
+10 1
+.names win_27_g4 win_67_g1
+1 1
+.names x4 x8 win_118_g0
+00 1
+.names win_138_g2 win_118_g0 win_118_g2
+00 1
+.names win_118_g2 new_n746
+1 1
+.names win_27_g3 win_57_g0
+1 1
+.names win_57_g0 win_116_g0
+1 1
+.names new_n43 win_116_g0 win_116_g1
+01 1
+.names new_n746 win_116_g1 win_116_g2
+11 1
+.names win_116_g2 win_9_g0
+1 1
+.names win_67_g1 win_9_g0 win_79_g0
+00 1
+.names x7 new_n258 win_79_g2
+01 1
+.names win_79_g0 win_79_g2 win_106_g0
+10 1
+.names new_n371 win_106_g0 win_106_g1
+01 1
+.names x8 win_106_g1 win_106_g2
+00 1
+.names new_n410 win_106_g2 win_106_g3
+10 1
+.names x5 win_106_g3 win_168_g0
+11 1
+.names win_120_g4 win_168_g0 win_168_g1
+00 1
+.names new_n370 win_168_g1 win_168_g3
+00 1
+.names win_168_g3 p1
+0 1
+.names x0 p0
+1 1
+.names q8
+0
+.names new_n42 new_n177 new_n545
+11 1
+.names new_n130 new_n545 new_n546
+11 1
+.names x6 new_n546 win_172_g1
+00 1
+.names win_172_g1 win_172_g2 win_172_g4
+00 1
+.names win_172_g4 win_163_g0
+0 1
+.names win_163_g0 new_n549
+1 1
+.names x7 new_n549 new_n550
+10 1
+.names x2 new_n30 new_n433
+01 1
+.names x1 new_n433 win_173_g3
+01 1
+.names x0 win_173_g3 win_173_g4
+10 1
+.names win_173_g4 win_141_g0
+1 1
+.names win_141_g0 win_43_g0
+1 1
+.names win_43_g0 new_n569
+1 1
+.names new_n550 new_n569 new_n570
+01 1
+.names x8 new_n570 q7
+10 1
+.names x2 new_n32 win_101_g1
+11 1
+.names x5 x4 new_n558
+10 1
+.names win_26_g0 new_n599
+1 1
+.names win_66_g0 win_197_g4
+1 1
+.names win_197_g4 win_183_g0
+1 1
+.names win_183_g0 win_87_g0
+1 1
+.names win_87_g0 new_n113
+1 1
+.names x4 new_n113 new_n601
+10 1
+.names new_n599 new_n601 win_101_g0
+11 1
+.names new_n558 win_101_g0 win_133_g0
+00 1
+.names win_116_g0 win_133_g0 win_189_g0
+11 1
+.names win_189_g0 win_189_g1 win_189_g2
+00 1
+.names win_189_g2 win_133_g1
+0 1
+.names win_101_g1 win_133_g1 win_133_g2
+01 1
+.names win_23_g1 win_133_g2 win_133_g3
+10 1
+.names win_133_g3 new_n606
+1 1
+.names win_65_g0 win_115_g0
+1 1
+.names win_115_g0 win_45_g0
+1 1
+.names win_45_g0 new_n327
+1 1
+.names win_128_g1 win_145_g1
+1 1
+.names win_145_g1 win_75_g4
+1 1
+.names win_75_g4 win_173_g2
+1 1
+.names win_173_g2 win_64_g2
+0 1
+.names win_157_g0 win_64_g2 win_171_g1
+00 1
+.names win_171_g1 win_171_g2
+0 1
+.names win_171_g2 win_157_g2
+0 1
+.names win_157_g1 win_157_g2 win_157_g3
+00 1
+.names win_157_g3 new_n611
+1 1
+.names new_n327 new_n611 new_n612
+10 1
+.names win_199_g1 win_140_g4 win_140_g5
+11 1
+.names win_140_g5 win_199_g3
+1 1
+.names win_199_g3 win_70_g2
+1 1
+.names win_150_g2 win_109_g1
+1 1
+.names win_109_g1 new_n44
+1 1
+.names x5 x6 win_190_g3
+11 1
+.names win_190_g3 win_185_g2
+1 1
+.names win_185_g2 win_159_g3
+1 1
+.names win_159_g3 win_168_g2
+1 1
+.names win_168_g2 win_91_g0
+1 1
+.names new_n44 win_91_g0 win_91_g1
+00 1
+.names win_70_g2 win_91_g1 win_91_g2
+10 1
+.names new_n373 win_91_g2 win_91_g3
+11 1
+.names win_91_g3 win_55_g2
+1 1
+.names win_55_g2 new_n614
+1 1
+.names new_n258 new_n32 win_39_g0
+00 1
+.names win_140_g3 win_39_g1
+1 1
+.names x5 win_39_g1 win_39_g2
+01 1
+.names win_39_g0 win_39_g2 win_39_g3
+10 1
+.names win_39_g3 new_n618
+1 1
+.names x4 x7 win_57_g2
+11 1
+.names win_57_g2 new_n381
+1 1
+.names x3 new_n381 win_9_g1
+11 1
+.names new_n618 win_9_g1 win_9_g2
+01 1
+.names win_9_g2 new_n621
+1 1
+.names x7 new_n360
+1 1
+.names new_n43 new_n360 new_n622
+01 1
+.names new_n100 new_n130 new_n623
+10 1
+.names new_n622 new_n623 new_n624
+11 1
+.names new_n621 new_n624 new_n625
+00 1
+.names new_n614 new_n625 new_n626
+01 1
+.names new_n612 new_n626 new_n627
+01 1
+.names new_n606 new_n627 new_n628
+01 1
+.names new_n628 win_132_g0 win_132_g2
+01 1
+.names win_107_g1 win_54_g1
+1 1
+.names win_54_g1 new_n579
+1 1
+.names new_n346 new_n71 win_78_g0
+11 1
+.names x0 win_78_g0 win_78_g1
+10 1
+.names win_78_g1 new_n594
+1 1
+.names new_n579 new_n594 new_n595
+01 1
+.names new_n595 win_132_g1 win_132_g3
+01 1
+.names win_132_g2 win_132_g3 win_132_g4
+00 1
+.names win_132_g4 q6
+0 1
+.names x0 x6 win_161_g3
+00 1
+.names x7 win_89_g0 win_89_g1
+01 1
+.names x2 x7 win_184_g0
+00 1
+.names win_50_g2 win_184_g0 win_184_g2
+00 1
+.names win_184_g2 win_95_g1
+1 1
+.names win_95_g0 win_95_g1 win_95_g2
+11 1
+.names win_89_g1 win_95_g2 win_95_g3
+00 1
+.names win_95_g3 win_89_g2
+1 1
+.names win_89_g2 new_n663
+1 1
+.names new_n87 new_n663 new_n664
+10 1
+.names win_30_g0 new_n58
+1 1
+.names win_9_g1 new_n382
+1 1
+.names win_128_g1 win_53_g1
+1 1
+.names win_53_g1 win_86_g0
+1 1
+.names win_86_g0 win_85_g0
+1 1
+.names win_85_g0 new_n107
+1 1
+.names x4 new_n107 new_n677
+00 1
+.names new_n382 new_n677 new_n678
+00 1
+.names new_n58 new_n678 new_n679
+10 1
+.names win_138_g3 win_180_g0 win_152_g0
+11 1
+.names x8 win_152_g0 win_152_g1
+01 1
+.names win_152_g1 win_47_g2
+1 1
+.names x7 win_47_g2 win_69_g0
+11 1
+.names new_n679 win_69_g0 win_69_g1
+00 1
+.names x5 new_n680 win_125_g0
+10 1
+.names x3 x7 win_69_g2
+11 1
+.names x2 win_69_g2 win_125_g1
+10 1
+.names win_125_g0 win_125_g1 win_125_g2
+11 1
+.names win_69_g1 win_125_g2 win_125_g3
+10 1
+.names win_125_g3 win_69_g4
+1 1
+.names win_69_g4 new_n686
+1 1
+.names new_n41 win_169_g0 win_169_g1
+00 1
+.names new_n686 win_169_g1 win_169_g2
+00 1
+.names win_169_g2 win_72_g2
+0 1
+.names win_72_g2 new_n688
+1 1
+.names new_n664 new_n688 win_8_g0
+01 1
+.names win_148_g2 win_113_g0
+1 1
+.names new_n85 win_113_g0 win_113_g1
+11 1
+.names win_113_g1 new_n667
+1 1
+.names win_158_g0 new_n669
+1 1
+.names new_n77 new_n669 new_n670
+11 1
+.names new_n346 new_n670 new_n671
+11 1
+.names new_n667 new_n671 win_8_g1
+00 1
+.names x1 win_8_g1 win_8_g2
+10 1
+.names win_8_g0 win_8_g2 win_8_g3
+10 1
+.names win_171_g1 win_8_g3 win_161_g0
+01 1
+.names x0 win_161_g0 win_161_g1
+11 1
+.names x8 x4 new_n653
+11 1
+.names new_n71 win_57_g0 win_57_g1
+00 1
+.names win_57_g1 win_57_g2 win_57_g3
+11 1
+.names win_57_g3 new_n657
+1 1
+.names new_n653 new_n657 new_n658
+00 1
+.names x7 new_n51 win_96_g0
+11 1
+.names win_29_g4 win_96_g1 win_96_g2
+00 1
+.names win_96_g0 win_96_g2 win_96_g3
+00 1
+.names x8 win_96_g3 win_96_g4
+10 1
+.names win_96_g4 win_25_g1
+1 1
+.names new_n658 win_25_g1 win_25_g2
+00 1
+.names new_n131 win_2_g0 win_63_g1
+11 1
+.names win_25_g2 win_63_g1 win_161_g2
+00 1
+.names x6 win_161_g2 win_161_g4
+00 1
+.names win_161_g1 win_161_g4 win_161_g5
+10 1
+.names win_161_g3 win_161_g5 win_161_g6
+00 1
+.names win_161_g6 win_171_g3
+0 1
+.names win_171_g3 q5
+0 1
+.names new_n680 win_13_g0 win_140_g0
+00 1
+.names x8 win_140_g0 win_140_g1
+00 1
+.names win_140_g1 win_140_g4 win_140_g6
+10 1
+.names win_140_g6 win_13_g3
+1 1
+.names win_13_g3 win_109_g0
+1 1
+.names win_109_g0 new_n748
+1 1
+.names new_n152 new_n160 new_n749
+11 1
+.names x7 new_n749 new_n750
+10 1
+.names new_n748 new_n750 new_n751
+01 1
+.names win_95_g0 new_n532
+1 1
+.names win_32_g0 new_n132
+1 1
+.names win_24_g0 new_n153
+1 1
+.names new_n132 new_n153 new_n752
+11 1
+.names new_n532 new_n752 new_n753
+11 1
+.names win_27_g3 win_135_g0
+0 1
+.names win_135_g0 new_n239
+1 1
+.names x4 new_n153 new_n740
+11 1
+.names new_n239 new_n740 new_n754
+11 1
+.names new_n753 new_n754 new_n755
+00 1
+.names new_n751 new_n755 new_n756
+11 1
+.names new_n756 win_116_g2 win_116_g3
+10 1
+.names win_116_g3 new_n757
+1 1
+.names x0 new_n757 new_n758
+10 1
+.names new_n79 new_n740 new_n741
+11 1
+.names x7 new_n396 win_181_g4
+00 1
+.names new_n741 win_181_g4 win_94_g0
+01 1
+.names new_n668 win_169_g0 win_94_g1
+10 1
+.names win_94_g0 win_94_g1 win_94_g2
+10 1
+.names new_n758 win_94_g2 win_94_g3
+10 1
+.names win_94_g3 new_n760
+0 1
+.names x3 new_n760 new_n761
+10 1
+.names x0 x5 win_126_g3
+00 1
+.names win_79_g2 win_38_g2
+1 1
+.names win_38_g2 new_n379
+1 1
+.names win_112_g2 win_105_g1
+1 1
+.names win_105_g1 win_54_g0
+1 1
+.names win_54_g0 new_n145
+1 1
+.names new_n30 new_n145 new_n777
+10 1
+.names new_n379 new_n777 new_n778
+00 1
+.names new_n32 new_n433 new_n765
+11 1
+.names x2 x4 win_50_g3
+01 1
+.names win_50_g3 new_n769
+1 1
+.names new_n765 new_n769 new_n770
+00 1
+.names x5 win_50_g2 win_184_g1
+11 1
+.names new_n770 win_184_g1 win_184_g3
+10 1
+.names win_184_g3 win_123_g0
+1 1
+.names new_n778 win_123_g0 win_123_g1
+11 1
+.names win_123_g1 win_177_g0 win_177_g1
+01 1
+.names x0 win_177_g1 win_126_g0
+10 1
+.names x6 x7 win_164_g1
+11 1
+.names win_112_g0 win_164_g1 win_164_g2
+10 1
+.names win_164_g2 win_112_g1
+1 1
+.names win_112_g1 new_n786
+1 1
+.names new_n786 new_n787
+1 1
+.names new_n43 win_95_g0 win_185_g1
+00 1
+.names win_185_g1 win_6_g0 win_192_g0
+01 1
+.names win_162_g2 win_192_g0 win_192_g1
+10 1
+.names win_192_g1 win_192_g2 win_192_g3
+10 1
+.names win_192_g3 new_n799
+1 1
+.names new_n787 new_n799 new_n800
+01 1
+.names new_n800 win_126_g1 win_126_g2
+01 1
+.names win_126_g0 win_126_g2 win_126_g4
+10 1
+.names win_126_g3 win_126_g4 win_126_g5
+00 1
+.names win_126_g5 win_22_g3
+0 1
+.names win_22_g3 win_46_g2
+1 1
+.names win_46_g2 new_n805
+1 1
+.names new_n761 new_n805 q4
+01 0
+.names x0 x4 win_170_g0
+00 1
+.names new_n239 new_n558 new_n843
+10 1
+.names new_n78 new_n843 new_n844
+11 1
+.names win_91_g0 new_n45
+1 1
+.names new_n45 new_n46
+0 1
+.names win_13_g3 win_135_g2
+0 1
+.names win_135_g2 win_131_g1
+1 1
+.names win_194_g0 win_34_g0
+1 1
+.names win_34_g0 win_47_g1 win_131_g2
+11 1
+.names win_131_g1 win_131_g2 win_131_g3
+10 1
+.names win_131_g3 new_n849
+1 1
+.names new_n46 new_n849 new_n850
+10 1
+.names new_n844 new_n850 new_n851
+00 1
+.names win_130_g0 win_130_g1 win_130_g3
+01 1
+.names win_130_g3 win_19_g3
+1 1
+.names win_19_g3 new_n840
+1 1
+.names win_154_g0 new_n38
+1 1
+.names new_n64 win_194_g0 win_194_g2
+00 1
+.names win_194_g2 win_34_g1
+1 1
+.names new_n38 win_34_g1 win_83_g0
+11 1
+.names new_n840 win_83_g0 win_83_g2
+00 1
+.names x8 win_83_g2 win_83_g3
+10 1
+.names x3 win_83_g3 win_170_g1
+00 1
+.names new_n851 win_170_g1 win_170_g2
+11 1
+.names win_34_g1 win_24_g1
+1 1
+.names win_24_g1 new_n401
+1 1
+.names new_n401 new_n749 new_n826
+01 1
+.names x4 win_6_g0 win_38_g0
+01 1
+.names new_n752 win_38_g0 win_38_g1
+00 1
+.names win_38_g1 new_n829
+1 1
+.names new_n826 new_n829 new_n830
+01 1
+.names x1 x5 win_188_g0
+11 1
+.names win_188_g0 new_n70
+1 1
+.names win_53_g3 new_n808
+1 1
+.names new_n70 new_n808 win_6_g1
+00 1
+.names win_6_g1 new_n809
+1 1
+.names new_n100 new_n809 new_n810
+10 1
+.names win_29_g4 win_15_g0
+1 1
+.names new_n93 new_n668 new_n814
+10 1
+.names new_n814 win_101_g1 win_119_g1
+00 1
+.names win_15_g0 win_119_g1 win_119_g2
+00 1
+.names x5 new_n43 win_185_g0
+00 1
+.names win_185_g0 new_n788
+1 1
+.names win_184_g0 win_153_g1
+1 1
+.names new_n788 win_153_g1 win_153_g2
+11 1
+.names win_119_g2 win_153_g2 win_153_g3
+00 1
+.names win_153_g3 new_n816
+1 1
+.names new_n810 new_n816 new_n817
+01 1
+.names x3 new_n817 win_144_g0
+11 1
+.names new_n830 win_144_g0 win_144_g1
+11 1
+.names win_83_g0 win_144_g1 win_144_g2
+01 1
+.names win_170_g2 win_144_g2 win_144_g3
+00 1
+.names win_144_g3 win_170_g4
+1 1
+.names x0 win_170_g4 win_170_g5
+10 1
+.names win_170_g0 win_170_g5 win_170_g6
+00 1
+.names win_170_g6 win_5_g3
+0 1
+.names win_5_g3 q3
+0 1
+.names x3 win_76_g0
+1 1
+.names x0 win_76_g0 win_93_g1
+00 1
+.names win_93_g1 new_n904
+1 1
+.names win_128_g2 new_n912
+1 1
+.names x8 win_74_g1 win_74_g2
+10 1
+.names win_74_g2 win_80_g1
+1 1
+.names win_80_g0 win_80_g1 win_80_g2
+10 1
+.names win_80_g2 win_1_g1
+1 1
+.names win_158_g0 win_1_g1 win_1_g2
+11 1
+.names win_1_g2 new_n920
+1 1
+.names new_n51 new_n127 new_n921
+01 1
+.names new_n532 new_n921 new_n922
+11 1
+.names win_90_g1 win_4_g0
+1 1
+.names new_n77 win_4_g0 win_4_g1
+11 1
+.names win_4_g1 new_n924
+1 1
+.names x1 win_177_g1 win_177_g2
+00 1
+.names win_103_g4 win_177_g2 win_177_g3
+10 1
+.names win_177_g3 win_181_g2
+1 1
+.names win_181_g2 new_n927
+1 1
+.names new_n924 new_n927 new_n928
+00 1
+.names new_n922 new_n928 new_n929
+01 1
+.names new_n92 new_n929 new_n930
+10 1
+.names new_n920 new_n930 new_n931
+00 1
+.names new_n912 new_n931 new_n932
+01 1
+.names x7 win_27_g3 win_124_g0
+00 1
+.names win_124_g0 win_124_g1 win_124_g3
+10 1
+.names win_124_g3 win_149_g3
+1 1
+.names win_149_g3 new_n936
+1 1
+.names x8 x1 new_n454
+00 1
+.names new_n117 new_n454 new_n937
+11 1
+.names win_39_g1 new_n112
+1 1
+.names x8 new_n112 win_88_g0
+11 1
+.names new_n937 win_88_g0 win_88_g1
+00 1
+.names win_88_g1 new_n938
+1 1
+.names new_n381 new_n938 new_n939
+10 1
+.names win_70_g2 new_n534
+1 1
+.names win_97_g4 win_49_g1
+1 1
+.names win_49_g1 win_7_g1
+1 1
+.names win_7_g1 new_n159
+1 1
+.names x7 new_n378
+0 1
+.names new_n373 new_n378 win_18_g0
+00 1
+.names win_18_g0 new_n391
+1 1
+.names new_n159 new_n391 new_n940
+00 1
+.names new_n534 new_n940 new_n941
+11 1
+.names new_n939 new_n941 new_n942
+00 1
+.names new_n936 new_n942 new_n943
+01 1
+.names new_n38 new_n943 new_n944
+10 1
+.names win_53_g2 win_17_g0
+1 1
+.names new_n454 win_17_g0 win_166_g0
+01 1
+.names new_n30 win_23_g1 win_190_g0
+00 1
+.names win_190_g0 win_166_g1
+1 1
+.names win_138_g3 win_166_g1 win_194_g1
+10 1
+.names win_194_g1 win_194_g2 win_194_g3
+10 1
+.names win_194_g3 win_166_g2
+1 1
+.names win_166_g0 win_166_g2 win_166_g3
+00 1
+.names win_166_g3 win_104_g2
+1 1
+.names win_104_g2 new_n946
+1 1
+.names new_n41 win_35_g1
+1 1
+.names win_35_g1 new_n488
+1 1
+.names x4 win_157_g0 win_145_g0
+01 1
+.names win_145_g0 win_121_g2
+1 1
+.names win_121_g2 new_n948
+1 1
+.names new_n488 new_n948 new_n949
+10 1
+.names new_n176 new_n345 new_n950
+01 1
+.names new_n949 new_n950 new_n951
+00 1
+.names new_n946 new_n951 new_n952
+00 1
+.names new_n45 new_n599 new_n953
+11 1
+.names win_15_g0 new_n137
+1 1
+.names new_n258 new_n616
+0 1
+.names new_n137 new_n616 win_2_g1
+11 1
+.names new_n953 win_2_g1 win_2_g2
+00 1
+.names win_2_g0 win_2_g2 win_2_g3
+10 1
+.names win_2_g3 new_n956
+1 1
+.names win_116_g0 new_n240
+1 1
+.names x8 new_n240 win_83_g1
+01 1
+.names win_83_g1 new_n824
+1 1
+.names x1 x4 win_27_g1
+11 1
+.names win_27_g1 win_103_g5
+1 1
+.names win_103_g5 win_62_g4
+1 1
+.names win_62_g4 win_73_g0
+1 1
+.names win_73_g0 new_n206
+1 1
+.names win_91_g0 new_n957
+1 1
+.names new_n206 new_n957 new_n958
+01 1
+.names new_n824 new_n958 new_n959
+11 1
+.names win_152_g2 win_138_g4
+1 1
+.names win_138_g4 new_n181
+1 1
+.names x1 win_23_g1 win_51_g0
+01 1
+.names new_n181 win_51_g0 win_51_g1
+11 1
+.names win_51_g1 new_n961
+1 1
+.names x0 new_n961 new_n962
+10 1
+.names new_n959 new_n962 new_n963
+01 1
+.names new_n956 new_n963 new_n964
+01 1
+.names new_n952 new_n964 new_n965
+01 1
+.names new_n944 new_n965 new_n966
+01 1
+.names new_n932 new_n966 new_n967
+11 1
+.names new_n904 new_n967 q2
+00 1
+.names x0 new_n112 new_n1045
+01 1
+.names x5 win_32_g0 win_28_g3
+01 1
+.names win_28_g3 new_n577
+1 1
+.names new_n577 new_n572
+1 1
+.names new_n572 win_58_g0 win_58_g2
+01 1
+.names win_58_g2 win_37_g3
+1 1
+.names win_37_g3 win_56_g1 win_56_g2
+01 1
+.names x0 win_56_g2 win_56_g3
+10 1
+.names win_56_g3 new_n1015
+1 1
+.names win_166_g1 win_179_g2 win_179_g3
+01 1
+.names win_179_g2 win_190_g0 win_190_g1
+01 1
+.names win_190_g1 win_179_g4
+1 1
+.names win_179_g3 win_179_g4 win_179_g6
+00 1
+.names win_179_g6 win_127_g5
+1 1
+.names win_127_g5 new_n1019
+0 1
+.names new_n29 new_n1019 new_n1020
+10 1
+.names new_n1015 new_n1020 new_n1021
+00 1
+.names win_47_g1 new_n143
+1 1
+.names new_n616 new_n921 new_n1006
+11 1
+.names new_n143 new_n1006 new_n1007
+10 1
+.names new_n454 win_190_g1 win_190_g2
+10 1
+.names win_190_g2 new_n1002
+1 1
+.names x3 new_n622 win_110_g0
+00 1
+.names win_138_g2 win_110_g0 win_110_g1
+10 1
+.names new_n1002 win_110_g1 win_110_g2
+00 1
+.names new_n1007 win_110_g2 win_110_g3
+11 1
+.names win_110_g3 new_n1009
+1 1
+.names win_98_g1 win_196_g0 win_196_g1
+00 1
+.names win_17_g0 win_196_g1 win_196_g3
+10 1
+.names win_196_g3 new_n975
+1 1
+.names x1 new_n110
+0 1
+.names win_174_g1 win_93_g0
+1 1
+.names win_93_g0 new_n154
+1 1
+.names new_n110 new_n154 win_37_g0
+01 1
+.names win_175_g0 win_107_g6
+1 1
+.names win_107_g6 win_40_g3
+1 1
+.names win_40_g3 win_195_g2
+1 1
+.names win_195_g2 win_37_g1
+1 1
+.names win_37_g0 win_37_g1 win_37_g2
+01 1
+.names win_37_g2 new_n977
+1 1
+.names x2 new_n977 new_n978
+10 1
+.names x2 new_n41 win_46_g3
+00 1
+.names win_46_g3 win_80_g2 win_80_g3
+10 1
+.names win_80_g3 win_7_g3
+1 1
+.names win_7_g3 new_n982
+1 1
+.names new_n88 new_n982 new_n983
+10 1
+.names new_n978 new_n983 new_n984
+01 1
+.names win_175_g1 win_148_g3
+1 1
+.names win_148_g2 win_148_g3 win_148_g4
+10 1
+.names x4 win_148_g4 win_148_g5
+10 1
+.names win_148_g5 win_197_g3
+1 1
+.names win_197_g3 new_n997
+1 1
+.names new_n984 new_n997 new_n998
+01 1
+.names new_n975 new_n998 win_60_g0
+01 1
+.names new_n1009 win_60_g0 win_60_g1
+00 1
+.names new_n1021 win_60_g1 win_60_g2
+01 1
+.names new_n1045 win_60_g2 win_60_g3
+00 1
+.names win_60_g3 q1
+0 1
+.names new_n1147
+0
+.names new_n1147 q0
+0 1
+.end

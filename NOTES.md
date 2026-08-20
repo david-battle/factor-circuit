@@ -17,6 +17,7 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
  6 |         18 | ≥11 |   19 | ≤ 8  | ABC + ODC windowed resynth (LB corrected)
  7 |         37 | ≥12 |   74 | ≤ 62 | cegis_lb.py k=11 UNSAT; ABC + ODC windowed resynthesis
  8 |         76 |  10 |  208 | 198  | ABC + ODC windowed resynthesis
+ 9 |        149 |   8 |  503 |  ?   | per-output exact (p1,p2,q5 k=7 UNSAT); ABC 1158 + ODC windowed resynthesis
 ```
 
 ## How We Got Here — Chronological Summary
@@ -567,11 +568,60 @@ phase immediately).
 - Growth at the ABC-survey stage: N=8 535 → N=9 1158 (~2.2×), consistent
   with the ~2.4× seen at N=7→N=8.
 
-### Caveat / next step
+### Session: N=9 Windowed Resynthesis (Aug 20, 2026)
 
-`survey.py` does **not** persist the best BLIF (temp files are deleted in
-`run_upper_bound`), so there is no `factor9_*.blif` artifact yet. To apply
-windowed resynthesis, first regenerate the N=9 BLIF and run the ABC
-pipeline with an explicit `write_blif` to produce a `factor9_opt_final.blif`
-baseline, then run `window_opt.py` on it. If the usual ~40-60% windowed
-reduction holds, the N=9 UB should land around 400-500.
+Fixed the missing-artifact issue: wrote `make_factor9_blif.py`, which runs
+the same ABC strategy battery as `survey.py`'s `run_abc_optimize` (24
+one-shot strategies + 2 iterated single pipelines + alternating
+dch/dc2) but persists the best BLIF via explicit `write_blif`.
+
+- **`factor9_opt_final.blif` = 1158 AND gates (149/149 care points)**, the
+  same plateau `survey.py` reported — the port is faithful.
+- Then ran `window_opt.py` passes (200 iters each unless noted):
+
+| Pass | Seed | Params | Gates | Saved |
+|------|------|--------|-------|-------|
+| ABC baseline | — | — | 1158 | — |
+| 1 (probe) | 42 | default | 1009 | 149 |
+| 2 | 123 | default | 626 | 383 |
+| 3 | 999 | default | 571 | 55 |
+| 4 | 314 | default | 552 | 19 |
+| 5 | 777 | default | 536 | 16 |
+| 6 | 2026 | default | 531 | 5 |
+| 7 | 4242 | default | 529 | 2 |
+| 8 (probe) | 5555 | max_out=4, max_gates=30 | 529 | 0 |
+| 9 | 5555 | max_out=4, max_gates=30 | 526 | 3 |
+| 10 | 1337 | max_out=4, max_gates=30 | 516 | 10 |
+| 11 | 2718 | max_out=4, max_gates=30 | 506 | 10 |
+| 12 | 31415 | max_out=4, max_gates=30 | 504 | 2 |
+| 13 | 16180 | max_out=4, max_gates=30 | 503 | 1 |
+
+- **Final: `factor9_opt_final_opt.blif` = 503 AND gates, 149/149 care
+  points** (57% reduction from the 1158 ABC baseline).
+- Default window params stop helping around 530; switching to
+  `--max-out 4 --max-gates 30` found the rest (530→503). Last passes save
+  only 2, 1 gates — near the plateau.
+- `max_in=7` probe (seed 900): ~4.4s/iter vs ~0.7s/iter for max_in=6, and
+  0 improvements in 20 iters — abandoned.
+- Runtime estimate held: ~0.37s/iter early (1158 gates), growing to
+  ~1.4s/iter as the circuit shrank to 500 (denser = harder windows). Full
+  passes were 1-5.5 min each, all comfortably within a 20-min budget.
+- Cleaned up the intermediate `_opt` chain; only
+  `factor9_opt_final.blif` and `factor9_opt_final_opt.blif` remain.
+
+### N=9 Lower Bound (Aug 20, 2026)
+
+Added `n9_per_output_lb.py`: per-output exact-synthesis LB. For each
+nontrivial output bit, proves k UNSAT for the single-output circuit; if k
+UNSAT, that output needs at least k+1 gates, so the full factoring circuit
+(which must compute every output) needs at least k+1 gates. The max over
+outputs is the circuit LB.
+
+Nontrivial outputs: p1-p4, q1-q7 (p0=x0, p5-p8/q8=0, q0=1).
+
+- **p1, p2, q5: k=7 UNSAT (16-29s) → each needs ≥8 gates.**
+- p3, p4, q1-q4, q6, q7: k=6 UNSAT, k=7 undecided (30s budget) → ≥7 each.
+- **LB ≥ 8** (6m20s total sweep).
+
+Runtime held to estimates: k≤6 UNSAT in 0-7s, k=7 UNSAT in ~16-29s,
+k=7 undecided at 30s for the harder outputs.
