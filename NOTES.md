@@ -15,7 +15,7 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
  6 |         18 | ≥11 |   19 | ≤ 8  | ABC + ODC windowed resynth (LB corrected)
- 7 |         37 |  11 |   74 |  63  | ABC + ODC windowed resynthesis
+ 7 |         37 | ≥12 |   74 | ≤ 62 | cegis_lb.py k=11 UNSAT; ABC + ODC windowed resynthesis
  8 |         76 |  10 |  208 | 198  | ABC + ODC windowed resynthesis
 ```
 
@@ -42,7 +42,9 @@ gate symmetry breaking, skip constant-0 outputs.
 - N=5: Proved optimal at 4 AND gates.
 - N=6: Initially reported LB=10 (k=10 SAT, k=9 UNSAT); superseded below by
   the Aug 19, 2026 correction proving k=10 UNSAT and LB≥11.
-- N=7: Proved LB=11 (k=11 solvable at ~42s; k=12 hits 50K clause wall).
+- N=7: LB≥12 (k=10 UNSAT 3.6s, k=11 UNSAT 43s via `cegis_lb.py`; k=12
+  undecided after 19min — the current N=7 wall). The older "LB=11" claim
+  (k=11 solvable at ~42s) is superseded.
 
 The one-hot encoding scales as O(k² × C) clauses. For N=7 (C=37 care
 points), k=12 requires ~51K clauses — beyond what Glucose4 can handle
@@ -170,15 +172,15 @@ Note: ABC raw output was 535 gates, but strash to 2-input AIG inflated to 567.
 N=8 | LB=10 | UB=347 | gap=337
 ```
 
-Comparison with smaller N:
+Comparison with smaller N (historical, superseded LB/UB values):
 ```
 N  | Semiprimes | LB  | UB   | Gap  | UB Source
 ---|------------|-----|------|------|-------------------------------
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
- 6 |         18 |  10 |   20 |  10  | ABC + ODC windowed resynthesis
- 7 |         37 |  11 |   90 |  79  | ABC + ODC windowed resynthesis
- 8 |         76 |  10 |  347 | 337  | ABC + ODC windowed resynthesis
+ 6 |         18 | ≥11 |   19 | ≤ 8  | ABC + ODC windowed resynthesis
+ 7 |         37 | ≥12 |   74 | ≤ 62 | ABC + ODC windowed resynthesis
+ 8 |         76 |  10 |  208 | 198  | ABC + ODC windowed resynthesis
 ```
 
 The UB/LB gap is exploding. Both UB and LB need better techniques
@@ -339,7 +341,7 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
  6 |         18 | ≥11 |   19 | ≤ 8  | ABC + corrected ODC windowed resynth (LB corrected)
- 7 |         37 |  11 |   74 |  63  | ABC + corrected ODC windowed resynth
+ 7 |         37 | ≥12 |   74 | ≤ 62 | cegis_lb.py k=11 UNSAT; ABC + corrected ODC windowed resynth
  8 |         76 |  10 |  208 | 198  | ABC + corrected ODC windowed resynth
 ```
 
@@ -377,7 +379,8 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
 **Low priority:**
 - Investigate growth rate of UB/LB with N
 - Depth optimization (currently only gate count)
-- N=6 LB proving (gap is now only 9 — might be provable with better encoding)
+- N=6 LB: gap ≤ 8. k=11 (would give LB≥12) is the current wall — undecided
+  after 20M+ conflicts across encodings/solvers (see Aug 20 session below)
 
 **Tried and failed:**
 - Binary selector encoding: fewer variables and clauses but slower to solve.
@@ -475,3 +478,69 @@ Potential strategies:
 3. **Circuit-level analysis**: Examining specific gate combinations in the N=6 19-gate circuit to find redundancies.
 
 4. **ABC pipeline variants**: The original path followed the default `dch//dc2` pipeline. Different ratios might yield smaller circuits for a better starting point.
+
+## Session: CEGIS LB + Core Decomposition (Aug 20, 2026)
+
+### CEGIS LB toolchain
+
+Built and validated a CEGIS-style lower-bound loop (`cegis_lb.py`) over
+care-point subsets, keeping pairwise AMO (per the rejected-approaches list).
+
+- Validated: N=4 (k=0 UNSAT, k=1 SAT), N=5 (k=3 UNSAT, k=4 SAT),
+  N=6 (k=10 UNSAT in 29.6s → LB≥11).
+- **N=7 LB improved 11 → ≥12**: k=10 UNSAT in 3.6s, k=11 UNSAT in 43.1s
+  (k=12 undecided after 19min/8M conflicts — the current N=7 wall).
+- Supporting tools: `portfolio.py` (multi-solver + variable-permutation
+  portfolio), `n6_exact_sweep.py`, `subset_probe.py`.
+- **N=6 k=11 wall characterized**: undecided after 20M+ conflicts across
+  full-encoding, multi-solver, subset (12/14/18), incremental, and
+  irreducible-encoding runs. Even k=19 (witness provably exists) was
+  undecided at 2.5M conflicts — a witness-finding hardness, not an encoding
+  soundness issue.
+
+### Per-output exact synthesis (`single_output.py`)
+
+Only 6 of the 12 output bits need computation at N=6:
+
+- Constants/free: `p3,p4,p5,q5` ≡ 0, `q0` ≡ 1, `p0` = `x0`.
+- Exact per-output minima (proven): p1=p2=q1=q2=5, q3=6, q4=3.
+- **Zero-sharing total = 29 gates** (all verified on the 18 care points).
+- The support-size floors (sum 17) are unreachable: the individual output
+  functions are genuinely harder than their support implies (support-4
+  functions need 5-6 gates).
+
+### Core decomposition: the 18-gate hunt
+
+Searched the "shared core + independent per-output extensions" architecture
+systematically:
+
+| shared gates | best cumulative | method |
+|---|---|---|
+| 0 | 29 | exact per-output |
+| 1 | 21 | `core_gate_search.py` (best: p1's output function; p2=~p1 free) |
+| 2 | 20 | `beam_core_search.py` enriched pool (pair {q4.g1, core3.q1.g0}) |
+| 3 | 19 | greedy (`core_build.py`) and beam — multiple distinct 3-gate cores |
+| 4+ | 19 | plateau |
+
+- Greedy core (step 3): {p1.g4, q1.g1, core1.q4.g0} → 19.
+- Beam (level 3): {q4.g1, lit(x1 & ~x2), core3.q1.g0} → 19.
+- **Conclusion: the core+extension box bottoms out at 19 (the UB) across
+  three independent methods.** An 18-gate circuit has NOT been found and NOT
+  been ruled out — it would need interleaved/extension-sharing structure the
+  box cannot express, or may not exist. Deciding it requires the heavy k=18
+  exact-synthesis grind or a new architecture.
+- Practical notes: per-search budgets of 60s occasionally dropped hard
+  extension proofs as "undecided" (level-1 beam showed 22 vs known 21), but
+  the 19 conclusion is corroborated by greedy, joint, and beam.
+
+### Runtime budgets used (generous, not timeout-driven)
+
+Per-search budget 60s (normal searches ~1-2s), 12 workers:
+joint 2-gate over 561 pairs ~90s; beam 3-level over 176-function pool
+~30 min. Estimates pre-launch held up (avg ~1.5s/search).
+
+### Data files
+
+`single_output_circuits.json` (decoded standalone circuits) and
+`core_candidates.json` (harvested core pool) are regenerated by
+`single_output.py` / `core_build.py` and are gitignored.

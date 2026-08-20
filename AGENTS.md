@@ -47,14 +47,15 @@ N  | Semiprimes | LB  | UB   | Gap  | UB Source
  4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
  5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
  6 |         18 | ≥11 |   19 | ≤ 8  | ABC + corrected ODC windowed resynth (LB corrected)
- 7 |         37 |  11 |   74 |  63  | ABC + corrected ODC windowed resynth
+ 7 |         37 | ≥12 |   74 | ≤ 62 | cegis_lb.py k=11 UNSAT (43s); ABC + corrected ODC windowed resynth
  8 |         76 |  10 |  208 | 198  | ABC + corrected ODC windowed resynth
 ```
 
 LBs for N=4,5 from full SAT proof in `survey.py`. LB for N=6 from
 `survey.py` plus `exact_n6_from_above.py` / `run_n6_sweep.py`
-(LB≥11; k=10 proven UNSAT, k=9 proven UNSAT). N=7 and N=8 LBs are from
-the `survey.py` one-hot SAT encoding before the exact-synthesis clause wall.
+(LB≥11; k=10 proven UNSAT, k=9 proven UNSAT). N=7 LB is new: `cegis_lb.py`
+proved k=10 (3.6s) and k=11 (43s) UNSAT, giving LB≥12 (k=12 undecided after
+19min — the current wall). N=8 LB from the `survey.py` one-hot SAT encoding.
 UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
 
 ## Tools
@@ -70,6 +71,15 @@ UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
 | File | Purpose |
 |------|---------|
 | `window_opt.py` | SAT-based windowed resynthesis. Primary UB tool. |
+| `cegis_lb.py` | CEGIS LB loop over care-point subsets (pairwise AMO kept). Validated: N=4 (k=0 UNSAT, k=1 SAT), N=5 (k=3 UNSAT, k=4 SAT), N=6 (k=10 UNSAT in 29.6s, LB≥11). |
+| `single_output.py` | Per-output exact synthesis: minimum AIG gates for one output bit alone (exact). N=6: p1,p2,q1,q2=5, q3=6, q4=3 → zero-sharing total 29. |
+| `core_gate_search.py` | Rank candidate shared core gates (cost + per-output extension mins). Best single N=6 shared gate: p1's output function → 21. |
+| `joint_core_search.py` | 2-gate joint core search over the candidate pool (exact core cost). N=6 best 21 (seed pool) / 20 (enriched pool via beam). |
+| `core_build.py` | Greedy incremental shared-core builder; harvests new candidate gates each step into `core_candidates.json` (gitignored). N=6: 3-gate core → 19, plateaus. |
+| `beam_core_search.py` | Beam search over cores (size 1→2→3), width 25, exact min-over-orderings core cost. N=6: level-3 best 19. |
+| `portfolio.py` | Multi-solver + variable-permutation portfolio across workers. |
+| `n6_exact_sweep.py` | Parallel N=6 exact-synthesis sweep over k values. |
+| `subset_probe.py` | Parallel care-subset SAT probe for hard-instance diagnosis. |
 | `survey.py` | ABC UB survey + SAT LB binary search; source of N=4/N=5 exact proofs. |
 | `exact_n6_from_above.py` | Current N=6 exact-synthesis helper, testing k values from the proven lower bound upward. |
 | `run_n6_sweep.py` | N=6 windowed-resynthesis parameter sweep around the 19-gate UB. |
@@ -90,6 +100,33 @@ UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
 - Canonical final UB artifacts are `factor6_opt_final_opt.blif`,
   `factor7_opt_final_opt_opt.blif`, and
   `factor8_opt_final_opt_opt_opt_opt_opt.blif`.
+- `cegis_lb.py` reproduces the N=6 proof (k=10 UNSAT in 29.6s, LB≥11) using
+  the survey.py encoding on care subsets. Empirical findings, do not regress:
+  1. Keep the per-call conflict budget FIXED at 5000 (survey.py `check_k`
+     style). Escalating 5000→500k made the identical k=10 instance go from
+     ~29s/626K conflicts to undecided at 2.1M+ conflicts.
+  2. Care subsets must be rebuilt in SORTED original-index order. A permuted
+     care order changed clause insertion order and stalled the same instance.
+  3. `--max-add 4` (gradual subset growth) stalls on hard candidate SAT
+     searches near the boundary (|S|=12, k=10 N=6: 4.4M conflicts undecided).
+     `--max-add 0` (add all failures, jump to full set) matches survey.py
+     performance. The N=6 k=10 unsat core appears to need ~the full care set,
+      so CEGIS's per-call clause reduction does not currently pay off for the
+      LB direction.
+- **N=6 structure & the 18-gate question (Aug 20):** Only 6 of 12 output bits
+  need computation (`p1,p2,q1,q2,q3,q4`); `p0=x0`, the rest are constants.
+  Per-output exact minima (no sharing) total 29. Core-decomposition search:
+  1 shared gate → 21, 2 shared gates → 20 (beam, enriched pool), 3 shared
+  gates → 19. The "shared core + independent per-output extensions"
+  architecture bottoms out at 19 across three independent methods (greedy,
+  joint, beam). **An 18-gate circuit has NOT been found and NOT been ruled
+  out**: it would need interleaved/extension-sharing structure that the
+  core+extension box cannot express, or may not exist. Deciding it requires
+  the heavy k=18 exact-synthesis grind or a new architecture.
+- Open LB walls: N=6 k=11 (undecided after 20M+ conflicts across
+  encodings/solvers), N=7 k=12 (undecided after 19min/8M conflicts).
+- Generated data `single_output_circuits.json` and `core_candidates.json`
+  are gitignored (regenerated by `single_output.py` / `core_build.py`).
 - Before continuing, run:
 
   ```bash
