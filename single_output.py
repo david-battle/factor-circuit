@@ -15,11 +15,13 @@ from pysat.solvers import Solver
 
 # ── encoding (mirrors cegis_lb.build_cnf, single output) ──────────────
 
-def build_single_cnf(N, care, target_bits, k, extras=None):
-    """Encode "a k-gate AIG whose single output equals target_bits[t] on care[t]".
+def build_multi_cnf(N, care, targets, k, extras=None):
+    """Encode "a k-gate AIG whose outputs equal targets[j][t] on care[t]".
 
-    target_bits[t] in {0,1} is the required output value on care point t.
-    extras: list of truth vectors (len C) for shared sources available to this
+    targets is a list of truth vectors (len C); targets[j][t] in {0,1} is the
+    required value of output j on care point t.  Outputs may select any gate,
+    input, or constant (free inversion), so two outputs can share one gate.
+    extras: list of truth vectors (len C) for shared sources available to every
     output (e.g. previously-chosen core gates).  Returns (clauses, nvars, meta).
     """
     C = len(care)
@@ -108,48 +110,50 @@ def build_single_cnf(N, care, target_bits, k, extras=None):
         gate_inv_list.append(gate_invs)
         gate_avail_list.append(available)
 
-    # single output, pinned to target_bits
+    # outputs, each pinned to its own target vector
     available_out = ["const0"] + [f"in{i}" for i in range(N)] + [
         f"ex{j}" for j in range(len(extras))
     ] + [f"g{i}" for i in range(k)]
-    selectors = [new_var() for _ in available_out]
-    inv = new_var()
-    clauses.append(selectors)
-    for i in range(len(selectors)):
-        for j in range(i + 1, len(selectors)):
-            clauses.append([-selectors[i], -selectors[j]])
+    out_info = []
+    for target_bits in targets:
+        selectors = [new_var() for _ in available_out]
+        inv = new_var()
+        clauses.append(selectors)
+        for i in range(len(selectors)):
+            for j in range(i + 1, len(selectors)):
+                clauses.append([-selectors[i], -selectors[j]])
 
-    for si, source in enumerate(available_out):
-        sel = selectors[si]
-        for t, (x, _, _) in enumerate(care):
-            required = target_bits[t]
-            if source == "const0":
-                if required:
-                    clauses.append([-sel, inv])
+        for si, source in enumerate(available_out):
+            sel = selectors[si]
+            for t, (x, _, _) in enumerate(care):
+                required = target_bits[t]
+                if source == "const0":
+                    if required:
+                        clauses.append([-sel, inv])
+                    else:
+                        clauses.append([-sel, -inv])
+                elif source.startswith("in"):
+                    source_value = (x >> int(source[2:])) & 1
+                    if source_value == required:
+                        clauses.append([-sel, -inv])
+                    else:
+                        clauses.append([-sel, inv])
+                elif source.startswith("ex"):
+                    source_value = extras[int(source[2:])][t]
+                    if source_value == required:
+                        clauses.append([-sel, -inv])
+                    else:
+                        clauses.append([-sel, inv])
                 else:
-                    clauses.append([-sel, -inv])
-            elif source.startswith("in"):
-                source_value = (x >> int(source[2:])) & 1
-                if source_value == required:
-                    clauses.append([-sel, -inv])
-                else:
-                    clauses.append([-sel, inv])
-            elif source.startswith("ex"):
-                source_value = extras[int(source[2:])][t]
-                if source_value == required:
-                    clauses.append([-sel, -inv])
-                else:
-                    clauses.append([-sel, inv])
-            else:
-                source_value = sig[int(source[1:])][t]
-                if required:
-                    clauses.append([-sel, source_value, inv])
-                    clauses.append([-sel, -source_value, -inv])
-                else:
-                    clauses.append([-sel, -source_value, inv])
-                    clauses.append([-sel, source_value, -inv])
+                    source_value = sig[int(source[1:])][t]
+                    if required:
+                        clauses.append([-sel, source_value, inv])
+                        clauses.append([-sel, -source_value, -inv])
+                    else:
+                        clauses.append([-sel, -source_value, inv])
+                        clauses.append([-sel, source_value, -inv])
 
-    out_info = [(selectors, inv, available_out)]
+        out_info.append((selectors, inv, available_out))
 
     meta = {
         'k': k, 'N': N, 'care': care,
@@ -161,10 +165,11 @@ def build_single_cnf(N, care, target_bits, k, extras=None):
     return clauses, next_var - 1, meta
 
 
-def decode_single(meta, model, extras_names=None):
-    """Return (gate_specs, output_spec) from a SAT model.
+def decode_multi(meta, model, extras_names=None):
+    """Return (gate_specs, output_specs) from a SAT model.
 
-    gate_specs[g] = (src0, inv0, src1, inv1) for gate g; output = (src, inv).
+    gate_specs[g] = (src0, inv0, src1, inv1) for gate g; output_specs[j] =
+    (src, inv) for output j.
     """
     k = meta['k']
     model_set = set(model)
@@ -180,16 +185,23 @@ def decode_single(meta, model, extras_names=None):
             inv = meta['gate_inv_list'][g][input_num]
             srcs.append((picked[0], is_true(inv)))
         gate_specs.append(tuple(srcs))
-    sel, inv, avail = meta['out_info'][0]
-    picked = [avail[i] for i, v in enumerate(sel) if is_true(v)]
-    assert len(picked) == 1, picked
-    output = (picked[0], is_true(inv))
-    return gate_specs, output
+    output_specs = []
+    for sel, inv, avail in meta['out_info']:
+        picked = [avail[i] for i, v in enumerate(sel) if is_true(v)]
+        assert len(picked) == 1, picked
+        output_specs.append((picked[0], is_true(inv)))
+    return gate_specs, output_specs
 
 
-def check_single(N, care, target_bits, k, timeout_seconds=None, extras=None):
-    """Check if a k-gate single-output circuit exists. Returns (sat, model)."""
-    clauses, nvars, meta = build_single_cnf(N, care, target_bits, k, extras)
+def decode_single(meta, model, extras_names=None):
+    """Single-output wrapper around decode_multi."""
+    gate_specs, output_specs = decode_multi(meta, model)
+    return gate_specs, output_specs[0]
+
+
+def check_multi(N, care, targets, k, timeout_seconds=None, extras=None):
+    """Check if a k-gate multi-output circuit exists. Returns (sat, model)."""
+    clauses, nvars, meta = build_multi_cnf(N, care, targets, k, extras)
     s = Solver(name="cd153")
     for cl in clauses:
         s.add_clause(cl)
@@ -214,6 +226,11 @@ def check_single(N, care, target_bits, k, timeout_seconds=None, extras=None):
             model = s.get_model()
     s.delete()
     return sat, model
+
+
+def check_single(N, care, target_bits, k, timeout_seconds=None, extras=None):
+    """Check if a k-gate single-output circuit exists. Returns (sat, model)."""
+    return check_multi(N, care, [target_bits], k, timeout_seconds, extras)
 
 
 # ── target bit extraction ─────────────────────────────────────────────
@@ -299,7 +316,7 @@ if __name__ == "__main__":
             print("  -> NOT FOUND within max_k/time")
             continue
         k, model = found
-        clauses, nvars, meta = build_single_cnf(N, care, target, k)
+        clauses, nvars, meta = build_multi_cnf(N, care, [target], k)
         s = Solver(name="cd153")
         for cl in clauses:
             s.add_clause(cl)

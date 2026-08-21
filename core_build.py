@@ -12,7 +12,7 @@ import math
 import time
 from multiprocessing import Pool
 
-from single_output import (enumerate_care, check_single, build_single_cnf,
+from single_output import (enumerate_care, check_single, build_multi_cnf,
                            decode_single)
 from window_opt import parse_blif
 from core_gate_search import sim_single_circuit, sim_blif_gates, xor_vectors
@@ -139,8 +139,8 @@ def main():
             k = per[o]
             if k == 0:
                 continue
-            clauses, nvars, meta = build_single_cnf(N, CARE, TARGETS[o], k,
-                                                    extras)
+            clauses, nvars, meta = build_multi_cnf(N, CARE, [TARGETS[o]], k,
+                                                   extras)
             from pysat.solvers import Solver
             s = Solver(name="cd153")
             for cl in clauses:

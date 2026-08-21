@@ -780,4 +780,82 @@ N | Semiprimes |  LB |  UB | Gap | UB source
 - N=13 baseline (~2.1x N=12 ≈ 22-23k) is cheap to build; the polish loop
   would be slower per pass (~30s/iter at N=12, more at N=13) but the
   alternation pattern should still work.
-k=7 undecided at 30s for the harder outputs.
+
+## Session: Pair-output LB + N=12 UB resume (Aug 22, 2026)
+
+### Pair-output exact-synthesis LB (`pair_output_lb.py`)
+
+New LB strategy, strictly stronger than per-output: **any full circuit, cut
+down to the gates feeding two outputs (bi, bj), is itself a valid AIG
+computing that pair on the care set**, so the full circuit needs at least
+`pair-min(bi,bj)` gates. `LB = max over pairs of pair-min`, which dominates
+the per-output LB since `pair-min >= max(min_i, min_j)`. The win case: a
+single bit can be SAT at k (its exact min), yet no k-gate structure computes
+the PAIR — proving pair UNSAT at the same k wall per-output was stuck at.
+
+Implementation: generalized `single_output.py`'s encoder to multi-output
+(`build_multi_cnf` / `check_multi` / `decode_multi`; `check_single` /
+`decode_single` are backward-compatible wrappers; `core_build.py` import
+updated). The k-gate structure is shared by all outputs; each output picks a
+source (const/input/gate) with free inversion. New driver `pair_output_lb.py
+N NAME1 NAME2 [--max-k K] [--timeout SEC]` sweeps k from 0, stopping at first
+SAT (exact pair-min) or UNDECIDED.
+
+**N=6 validation** (18 care points, all fast):
+pair-min(p1,p2)=5 (=max, full sharing), (p1,q4)=6, (p1,q2)=9, (p2,q2)=9,
+(p1,q3)=9, (q2,q3)=9. Cross-factor pairs are the expensive ones (no natural
+sharing between p and q); same-factor p1,p2 shares completely at N=6.
+N=6 pair LB = 9 < the cegis LB=11, so no improvement there.
+
+**Results (cd153, all pair-min proofs):**
+
+| N | pair | k UNSAT (times) | LB | prior per-output LB |
+|---|------|------------------|----|--------------------|
+| 9 | p1,p2 / p1,q5 / p2,q5 | k=9 UNSAT (246s/851s/505s); k=10 undecided @1800s each | **10** | 8 |
+| 10 | p1,p2 / p1,q5 / p2,q5 | k=9 UNSAT (1365s/1135s/1150s); k=10 undecided @3600s each | **10** | 8 |
+| 11 | p1,q5 / p2,q5 | k=9 UNSAT (2093s/2490s); **k=10 UNSAT (2841s/3080s)**; k=11 undecided @3600s each | **11** | 10 |
+
+N=9 and N=10 both jump 8→10; N=11 goes 10→11 (k=10 UNSAT was the single-
+output wall). The pair approach climbs a rung at the k-wall per-output was
+stuck at.
+
+### N=12 UB resume
+
+Restarted the N=12 polish loop (`polish_loop.py 12 1440 --win-iters 80`,
+`setsid nohup`, log in polish12.log — gitignored). Trajectory through r8:
+7381 → 7303 → 7227 → 7203 → 7153 → 7090 → 7040 → 6955 → 6905 → 6860 → 6817
+→ 6762 → 6735 → 6705 → 6653 → 6620 → 6582 → 6532 → 6503 → 6464 → 6403 →
+6377 → 6355 → 6309. **Every op a new best through r8 — zero plateau rounds.**
+ABC structural passes are ~1s (timed 0.6s on the ~6.3k-gate netlist); the
+window passes (947-3256s each) dominate runtime. Still running at handoff
+(24h budget).
+
+### Updated table (Aug 22, handoff-time)
+
+```
+N | Semiprimes |  LB |  UB | Gap | UB source
+--|------------|----:|----:|----:|-------------------------------------------------
+ 4|          4 |   1 |   1 |   0 | SAT exact synthesis (proven optimal)
+ 5|          7 |   4 |   4 |   0 | SAT exact synthesis (proven optimal)
+ 6|         18 |  11 |  19 |   8 | ABC + corrected ODC windowed resynth
+ 7|         37 |  12 |  49 |  37 | cegis_lb.py k=11 UNSAT; polish loop (Aug 21)
+ 8|         76 |  10 | 147 | 137 | ABC + ODC windowed resynth; polish loop (Aug 21)
+ 9|        149 |  10 | 408 | 398 | pair-output exact (k=9 UNSAT x3); polish loop (Aug 21)
+10|        293 |  10 | 970 | 960 | pair-output exact (k=9 UNSAT x3); ABC 2513 + polish loop (Aug 21)
+11|        575 |  11 |2283 |2272 | pair-output exact (k=10 UNSAT x2); ABC 5264 + polish loop (Aug 22)
+12|       1106 |  —  |6309 |  —  | ABC 10763 baseline; polish loop (Aug 22, STILL RUNNING)
+```
+
+### Remaining ideas (this session)
+
+- **N=12 LB**: the pair tooling now exists — a N=12 pair sweep (e.g. the
+  expensive single outputs at N=12, found cheaply via a k=6/7 single-output
+  probe first) toward LB≥9-10. Cost: pair k=8 at 1106 care points is likely
+  ~10-40 min (single k=8 est); k=9 harder.
+- N=12 UB loop: let it finish its budget; it was still ~100-150/round at
+  handoff.
+- N=11 pair k=11 (→ LB=12): undecided at 1h; would need a long grind.
+- N=9/N=10 pair k=10 (→ LB=11): undecided at 30m/1h.
+- N=13 baseline is cheap; the polish loop gets slower per pass.
+- Generalization note: the multi-output encoder also supports triples/k-tuples
+  (same `build_multi_cnf`); the most expensive k-tuple dominates the pair LB.

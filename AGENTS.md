@@ -55,10 +55,10 @@ N | Semiprimes |  LB |  UB | Gap | UB source
  6|         18 |  11 |  19 |   8 | ABC + corrected ODC windowed resynth
  7|         37 |  12 |  49 |  37 | cegis_lb.py k=11 UNSAT; polish loop (Aug 21)
  8|         76 |  10 | 147 | 137 | ABC + ODC windowed resynth; polish loop (Aug 21)
- 9|        149 |   8 | 408 | 400 | per-output exact (p1,p2,q5 k=7 UNSAT); polish loop (Aug 21)
-10|        293 |   8 | 970 | 962 | per-output exact (p1,p2 k=7 UNSAT); ABC 2513 + polish loop (Aug 21)
-11|        575 |  10 |2283 |2273 | per-output exact (p1,q5 k=9 UNSAT); ABC 5264 + polish loop (Aug 22)
-12|       1106 |  —  |7381 |  —  | ABC 10763 baseline; polish loop (Aug 22, still improving)
+ 9|        149 |  10 | 408 | 398 | pair-output exact (p1,p2/p1,q5/p2,q5 k=9 UNSAT); polish loop (Aug 21)
+10|        293 |  10 | 970 | 960 | pair-output exact (p1,p2/p1,q5/p2,q5 k=9 UNSAT); ABC 2513 + polish loop (Aug 21)
+11|        575 |  11 |2283 |2272 | pair-output exact (p1,q5/p2,q5 k=10 UNSAT); ABC 5264 + polish loop (Aug 22)
+12|       1106 |  —  |6309 |  —  | ABC 10763 baseline; polish loop (Aug 22, still running)
 ```
 
 LBs for N=4,5 from full SAT proof in `survey.py`. LB for N=6 from
@@ -66,19 +66,25 @@ LBs for N=4,5 from full SAT proof in `survey.py`. LB for N=6 from
 (LB=11; k=10 proven UNSAT, k=9 proven UNSAT). N=7 LB is new: `cegis_lb.py`
 proved k=10 (3.6s) and k=11 (43s) UNSAT, giving LB=12 (k=12 undecided after
 19min — the current wall). N=8 LB from the `survey.py` one-hot SAT encoding.
-N=9 LB=8 from per-output exact synthesis (`n9_per_output_lb.py`): p1, p2, q5
-each need at least 8 gates alone (k=7 UNSAT), so any full circuit needs at
-least 8. N=10 LB=8 same method: p1, p2 need at least 8 gates (k=7 UNSAT).
-N=11 LB=10 from per-output exact (`single_output.py`): p1 and q5 each prove
-k=9 UNSAT (2955s / 6607s; p2,q5 prove k=8 too); p1 k=10 undecided after 3h.
+N=9/N=10/N=11 LBs come from **pair-output exact synthesis**
+(`pair_output_lb.py`, multi-output mode of `single_output.py`): any full
+circuit cut down to the gates feeding two outputs is a valid circuit for that
+pair on the care set, so `max over pairs of pair-min` is a circuit LB that
+dominates the per-output LB. N=9: (p1,p2), (p1,q5), (p2,q5) each prove k=9
+UNSAT (246/851/505s) → LB=10 (k=10 undecided @1800s). N=10: the same three
+pairs prove k=9 UNSAT (1365/1135/1150s) → LB=10 (k=10 undecided @3600s).
+N=11: (p1,q5) k=10 UNSAT 2841s and (p2,q5) k=10 UNSAT 3080s → LB=11
+(k=11 undecided @3600s). Historical per-output LBs these replaced: N=9 LB=8
+(`n9_per_output_lb.py`, p1,p2,q5 k=7 UNSAT), N=10 LB=8 (p1,p2 k=7 UNSAT),
+N=11 LB=10 (`single_output.py`, p1,q5 k=9 UNSAT).
 
 UBs from ABC + multi-pass windowed resynthesis (corrected ODC mode) plus the
 **polish loop**: alternate `strash; compress2rs; fraig; balance` (structural,
 exact on all inputs) with windowed resynthesis (don't-care exploitation).
 Neither alone reaches these values; each opens new basins for the other.
 N=7 74→49, N=8 208→147, N=9 503→408, N=10 2513→970, N=11 5264→2283,
-N=12 10763→7381 (still improving when stopped). N=6 stayed at 19 (structural
-polish finds nothing there).
+N=12 10763→6309 (still dropping every round — the loop was still running at
+handoff). N=6 stayed at 19 (structural polish finds nothing there).
 
 ## Tools
 
@@ -95,8 +101,9 @@ polish finds nothing there).
 | `window_opt.py` | SAT-based windowed resynthesis. Primary UB tool. |
 | `polish_loop.py` | Overnight UB driver: alternates ABC structural polish with `window_opt.py` passes, verifies care-correctness after every op, keeps `factor{N}_opt_final_opt.blif` monotonic. Flags: `--no-window`, `--no-abc`, `--win-iters N`, `--seed S`, `--max-out A,B`, `--max-gates A,B`. Run under `setsid nohup` so shell timeouts can't group-kill it. |
 | `cegis_lb.py` | CEGIS LB loop over care-point subsets (pairwise AMO kept). Validated: N=4 (k=0 UNSAT, k=1 SAT), N=5 (k=3 UNSAT, k=4 SAT), N=6 (k=10 UNSAT in 29.6s, LB=11). |
-| `single_output.py` | Per-output exact synthesis: minimum AIG gates for one output bit alone (exact). N=6: p1,p2,q1,q2=5, q3=6, q4=3 → zero-sharing total 29. |
-| `n9_per_output_lb.py` | Per-output exact LB; takes N as argv (default 9). N=9/N=10: p1,p2 (and q5 at N=9) k=7 UNSAT → LB=8. N=11 LB=10 from `single_output.py`: p1,q5 k=9 UNSAT. |
+| `single_output.py` | Per-output exact synthesis: minimum AIG gates for one output bit alone (exact). Multi-output mode via `build_multi_cnf`/`check_multi`/`decode_multi` (shared k-gate structure, one output selector per target; used by `pair_output_lb.py`). N=6: p1,p2,q1,q2=5, q3=6, q4=3 → zero-sharing total 29. |
+| `n9_per_output_lb.py` | Per-output exact LB; takes N as argv (default 9). N=9/N=10: p1,p2 (and q5 at N=9) k=7 UNSAT → LB=8. Superseded by pair-output LB for the headline numbers (see `pair_output_lb.py`). |
+| `pair_output_lb.py` | Pair-output exact-synthesis LB (multi-output mode of `single_output.py`): min AIG gates to compute two output bits jointly on the care set. Max over pairs dominates per-output LB. N=9 LB=10, N=10 LB=10, N=11 LB=11. Usage: `pair_output_lb.py N NAME1 NAME2 [--max-k K] [--timeout SEC]`. |
 | `core_gate_search.py` | Rank candidate shared core gates (cost + per-output extension mins). Best single N=6 shared gate: p1's output function → 21. |
 | `joint_core_search.py` | 2-gate joint core search over the candidate pool (exact core cost). N=6 best 21 (seed pool) / 20 (enriched pool via beam). |
 | `core_build.py` | Greedy incremental shared-core builder; harvests new candidate gates each step into `core_candidates.json` (gitignored). N=6: 3-gate core → 19, plateaus. |
@@ -124,7 +131,7 @@ polish finds nothing there).
 | `factor11_opt_final.blif` | N=11 ABC pipeline baseline (5264 AND gates). |
 | `factor11_opt_final_opt.blif` | N=11 after polish loop (2283 AND gates). |
 | `factor12_opt_final.blif` | N=12 ABC pipeline baseline (10763 AND gates). |
-| `factor12_opt_final_opt.blif` | N=12 after polish loop (7381 AND gates; still improving when stopped). |
+| `factor12_opt_final_opt.blif` | N=12 after polish loop (6309 AND gates at the Aug 22 handoff; the loop was still running and lowering it). |
 
 Other tracked files not listed above (`rank_core_gates.py`,
 `exact_factor6*.py`, `experiment.py`, `factor4.blif`, `factor6*.blif`,
@@ -135,15 +142,26 @@ history).
 
 ## Current Handoff
 
-- **State as of Aug 22, 2026** — the results table above is current. Any
-  LB/UB claims in NOTES.md not matching the table are archival; the table
-  wins. All UBs from the polish loop are verified care-correct.
+- **State as of Aug 22, 2026 (written mid-run)** — the results table above
+  is current. Any LB/UB claims in NOTES.md not matching the table are
+  archival; the table wins. All UBs from the polish loop are verified
+  care-correct. **The N=12 polish loop is STILL RUNNING** (pid 29269,
+  `polish_loop.py 12 1440 --win-iters 80`, log `polish12.log`, gitignored):
+  it writes new bests to `factor12_opt_final_opt.blif` (~6309 at handoff),
+  so that file's gate count may differ from the table — re-verify before
+  citing it.
 - Canonical final UB artifacts are `factor6_opt_final_opt.blif`,
   `factor7_opt_final_opt_opt.blif`,
   `factor8_opt_final_opt_opt_opt_opt_opt.blif`,
   `factor9_opt_final_opt.blif`, `factor10_opt_final_opt.blif`,
   `factor11_opt_final_opt.blif`, and `factor12_opt_final_opt.blif`.
   Untouched ABC baselines are the `factor{N}_opt_final.blif` files.
+- **Pair-output exact synthesis is the LB workhorse** (added Aug 22,
+  `pair_output_lb.py`): `max over pairs of pair-min` dominates the
+  per-output LB. It climbed N=9 8→10, N=10 8→10, N=11 10→11, all by proving
+  pair UNSAT at k where per-output was SAT/stuck. The multi-output encoder
+  (`build_multi_cnf` in `single_output.py`) also supports k-tuples for a
+  future rung.
 - **The polish loop is the current UB workhorse.** Alternate ABC
   structural polish (`strash; compress2rs; fraig; balance`) with SAT
   windowed resynthesis (`window_opt.py --max-out 4-5 --max-gates 40-100`).
@@ -174,16 +192,14 @@ history).
   not exist. Deciding it requires the heavy k=18 exact-synthesis grind or a
   new architecture.
 - **Open LB walls:** N=6 k=11 (undecided after 20M+ conflicts across
-  encodings/solvers), N=7 k=12 (undecided after 19min/8M conflicts), N=11
-  p1 k=10 (undecided after 3h, cd153 — try Glucose4 or a longer budget).
-  Per-output exact LB: N=9/N=10 stuck at 8 (k=7 UNSAT the feasible limit);
-  N=11 reached 10 (p1, q5 k=9 UNSAT).
-- **Most valuable next step** (for the growth-curve goal): **resume the
-  N=12 UB polish loop** (`polish_loop.py 12 ... --win-iters 80`), which was
-  still dropping ~100-150/round at 7381 when stopped; then a **N=12 per-output
-  LB sweep** (1106 care points; k=7 ~1-2 min each, k=8 ~10-40 min) to reach
-  LB≥9. N=13 baseline is cheap (~2.1x N=12 ≈ 22k) but the loop gets slower
-  per pass.
+  encodings/solvers), N=7 k=12 (undecided after 19min/8M conflicts).
+  Pair-output walls: N=9/N=10 k=10 (undecided @1800s/3600s — would give
+  LB=11), N=11 k=11 (undecided @3600s — would give LB=12).
+- **Most valuable next step** (for the growth-curve goal): a **N=12 LB sweep
+  with the pair tooling** (or per-output as a cheap first pass — 1106 care
+  points, k=7 ~1-2 min each) to put a real LB on the N=12 row. The N=12 UB
+  polish loop is already running to its budget. N=13 baseline is cheap
+  (~2.1x N=12 ≈ 22k) but the loop gets slower per pass.
 - Generated data `single_output_circuits.json` and `core_candidates.json`
   are gitignored (regenerated by `single_output.py` / `core_build.py`).
 - Before continuing, run:
