@@ -25,43 +25,54 @@ def target_vector(care, name):
 
 
 def main():
-    args = sys.argv[1:]
-    N = int(args[0])
-    name1, name2 = args[1], args[2]
+    raw = sys.argv[1:]
+    N = int(raw[0])
+    names = []
     max_k = 12
     timeout = 60.0
-    if "--max-k" in args:
-        max_k = int(args[args.index("--max-k") + 1])
-    if "--timeout" in args:
-        timeout = float(args[args.index("--timeout") + 1])
+    i = 1
+    while i < len(raw):
+        a = raw[i]
+        if a == "--max-k":
+            max_k = int(raw[i + 1])
+            i += 2
+        elif a == "--timeout":
+            timeout = float(raw[i + 1])
+            i += 2
+        else:
+            names.append(a)
+            i += 1
+    if len(names) < 2:
+        sys.exit("usage: pair_output_lb.py N NAME1 NAME2 [NAME3 ...] "
+                 "[--max-k K] [--timeout SEC]")
 
     care = enumerate_care(N)
     print(f"{len(care)} care points")
-    t1 = target_vector(care, name1)
-    t2 = target_vector(care, name2)
+    targets = [target_vector(care, name) for name in names]
+    label = ",".join(names)
 
     lb = -1  # largest k proven UNSAT
-    pair_min = None
+    multi_min = None
     for k in range(0, max_k + 1):
         t0 = time.time()
-        sat, _ = check_multi(N, care, [t1, t2], k, timeout_seconds=timeout)
+        sat, _ = check_multi(N, care, targets, k, timeout_seconds=timeout)
         dt = time.time() - t0
         if sat:
-            pair_min = k
-            print(f"{name1},{name2}: k={k} SAT ({dt:.1f}s) -> pair-min={k}")
+            multi_min = k
+            print(f"{label}: k={k} SAT ({dt:.1f}s) -> k-tuple-min={k}")
             break
         elif sat is None:
-            print(f"{name1},{name2}: k={k} UNDECIDED ({dt:.1f}s) "
+            print(f"{label}: k={k} UNDECIDED ({dt:.1f}s) "
                   f"-> LB >= {lb + 1}")
             break
         else:
             lb = k
-            print(f"{name1},{name2}: k={k} UNSAT ({dt:.1f}s)")
+            print(f"{label}: k={k} UNSAT ({dt:.1f}s)")
 
-    if pair_min is not None:
-        print(f"{name1},{name2}: exact pair-min = {pair_min}")
+    if multi_min is not None:
+        print(f"{label}: exact k-tuple-min = {multi_min}")
     else:
-        print(f"{name1},{name2}: PROVEN pair-min >= {lb + 1} "
+        print(f"{label}: PROVEN k-tuple-min >= {lb + 1} "
               f"-> circuit LB >= {lb + 1}")
 
 

@@ -859,3 +859,55 @@ N | Semiprimes |  LB |  UB | Gap | UB source
 - N=13 baseline is cheap; the polish loop gets slower per pass.
 - Generalization note: the multi-output encoder also supports triples/k-tuples
   (same `build_multi_cnf`); the most expensive k-tuple dominates the pair LB.
+
+## Session: N=6 triples, N=12 LB probes, N=12 UB resume cont. (Aug 21-22, 2026)
+
+### N=6 triple search (settled — LB stays 11)
+
+Generalized `pair_output_lb.py` to accept 3+ output names (k-tuples; same
+`build_multi_cnf`). Probed four triples `(q3,{p1|p2},{q1|q2})`:
+
+| triple | k=8 | k=9 | k=10 | k=11 | triple-min |
+|--------|-----|-----|------|------|-----------|
+| q3,p1,q1 | UNSAT 10s | UNSAT 180s | UNDECIDED @1h | — | ≥ 10 |
+| q3,p1,q2 | UNSAT 9s | UNSAT 333s | **UNSAT 2444s** | UNDECIDED @1h | ≥ 11 |
+| q3,p2,q2 | UNSAT 8s | UNSAT 104s | **UNSAT 2676s** | UNDECIDED @1h | ≥ 11 |
+| q3,q1,q2 | UNSAT 8s | UNSAT 143s | UNDECIDED @1h | — | ≥ 10 |
+
+`(q3,p1,q2)` and `(q3,p2,q2)` prove triple-min ≥ 11 — **independently
+confirming the cegis LB=11** (pairs cannot beat 11 at N=6 since
+pair-min ≤ minA+minB ≤ 11; triples can reach 16 in principle). k=11 UNSAT
+(would give LB≥12) was undecided at 1h for both — the wall. N=6 LB stays 11.
+
+### N=12 LB probes
+
+Per-output singles (1106 care points):
+- p1: k=7 UNSAT 184s, k=8 UNSAT 949s, k=9 undecided @30min → direct LB ≥ 9.
+- p2: same → direct LB ≥ 9.
+- q5: k=7 UNSAT 298s, k=8 UNSAT 1704s, k=9 undecided @30min → direct LB ≥ 9.
+
+Pairs:
+- (p2,q5): k=8 UNSAT 256s, **k=9 UNSAT 1262s**, k=10 undecided @1h →
+  **direct N=12 LB ≥ 10** (the headline).
+- (p1,p2): k=8 UNSAT 223s, k=9 undecided @1h → ≥ 9.
+- (p1,q5): k=7 UNSAT 109s, k=8 undecided @1h → ≥ 8.
+
+**N=12 direct LB = 10.** Also, by monotonicity the N=12 care set contains the
+N=11 care set (restrict a 12-bit circuit to x11=0 → valid 11-bit circuit), so
+`min_12 ≥ min_11` for every output and every k-tuple — hence the inherited
+N=12 LB is ≥ 11 (from N=11 pair k=10 UNSAT). Both noted in the table row.
+
+### N=12 UB (loop still running)
+
+7381 → ... → 5943 by r13, still every-op-new-best. Round cadence ~35-70 min
+(two window passes dominate; abc polish ~1s), per-round savings declining
+~180 → ~72-97 (avg ~84 late). Budget: 24h from ~8:46 EDT Aug 21, so the loop
+self-terminates ~8:46 Aug 22. Canonical `factor12_opt_final_opt.blif` is
+rewritten by the loop — its gate count may differ from the table.
+
+### Docs
+
+Moved the AGENTS.md `## Results` section (column convention, LB sources, UB
+sources, and the table) to the very END of the file so the table is the last
+thing — `tail ~N+2` shows it. N+2 for N=12 is `tail -14` (blank + fence + 2
+header + 9 rows + fence); add one more line per future N.
