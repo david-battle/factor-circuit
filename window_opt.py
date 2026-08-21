@@ -207,7 +207,14 @@ class AIG:
 def parse_blif(filepath):
     aig = AIG()
     with open(filepath, 'r') as f:
-        lines = f.read().splitlines()
+        raw = f.read().splitlines()
+
+    lines = []
+    for line in raw:
+        if lines and lines[-1].rstrip().endswith('\\'):
+            lines[-1] = lines[-1].rstrip()[:-1] + line.strip()
+        else:
+            lines.append(line)
 
     i = 0
     while i < len(lines):

@@ -25,6 +25,8 @@ N | Semiprimes |  LB |  UB | Gap | UB Source
  8|         76 |  10 | 147 | 137 | ABC + ODC windowed resynth; polish loop (Aug 21)
  9|        149 |   8 | 408 | 400 | per-output exact (p1,p2,q5 k=7 UNSAT); polish loop (Aug 21)
 10|        293 |   8 | 970 | 962 | per-output exact (p1,p2 k=7 UNSAT); polish loop (Aug 21)
+11|        575 |  10 | 2283|2273 | per-output exact (p1,q5 k=9 UNSAT); polish loop (overnight Aug 22)
+12|       1106 |  —  | 7381|  —  | ABC 10763 baseline; polish loop (overnight Aug 22)
 ```
 
 ## How We Got Here — Chronological Summary
@@ -692,4 +694,90 @@ Cycle = polish (`compress2rs; fraig; balance`) → verify → windowed resynth
   slightly weaker. A portfolio of polish scripts per cycle is untested.
 - The polish loop never found anything on N=6 (19 stays). The N=6 exact
   question (does an 18-gate circuit exist) remains open.
+
+## Session: Overnight run — N=11 and N=12 UBs, N=11 LB (Aug 22, 2026)
+
+### Bug fix: BLIF line continuations in `parse_blif`
+
+N=11 has 22 outputs; ABC's BLIF writer wrapped the `.outputs` line with a
+`\` continuation, and `parse_blif` dropped everything after the backslash
+(silently misparsing `q0`). Fixed `parse_blif` to join continuation lines
+before parsing (window_opt.py). Regression-checked: N=9/10 verify unchanged.
+
+### N=11 UB
+
+- ABC baseline (`make_factor9_blif.py 11`): **5264** AND gates (2.1x N=10's
+  2513 — the ~2.2x/step pattern holds).
+- Ran the polish loop overnight. Both structural polish
+  (`strash; compress2rs; fraig; balance`) and windowed resynthesis kept
+  finding gains. Trajectory (round starts):
+  3773 → 3524 → 3056 → 2769 → 2585 → 2486 → 2436 → 2398 → 2335 → 2304 →
+  2296, then a second session with different window shapes
+  (max-out 6,4 / max-gates 40,80 / seed 5000) → **2283**.
+- **Final UB = 2283** (57% cut from 5264 baseline, 575/575 care points).
+  UB/2^N = 1.11 (N=10: 0.95, N=9: 0.80 — slow growth per N).
+- Note: a 200-iteration window pass from 4872 jumped straight to 3773;
+  the loop alternation each round saved ~50-250 gates early, shrinking to
+  ~10-20 near convergence.
+
+### N=11 LB
+
+Per-output exact (`single_output.check_single`, cd153):
+- p1 k=7 UNSAT 45s, **k=8 UNSAT 338s**, **k=9 UNSAT 2955s (49min)**.
+- p2 k=8 UNSAT 433s; q5 k=8 UNSAT 630s, **q5 k=9 UNSAT 6607s (110min)**.
+- p1 k=10 UNDECIDED after 10702s (3h, cd153).
+- **LB ≥ 10** (three outputs prove k=8; p1 and q5 each prove k=9). This
+  beats the N=9/N=10 LB=8 plateau — the per-output floor grows with N.
+- Nontrivial outputs at N=11: p1-p5, q1-q9 (14 of 22; p0=x0, q0=1,
+  p6-p10/q10=0).
+
+### N=12 UB
+
+- ABC baseline (`make_factor9_blif.py 12`): **10763** AND gates.
+- Polish loop (80-iter window passes, 2 sessions):
+  10570 → 8829 → 8526 → 8371 → 8212 → 8095 → 8032 → 7910 → 7857 → 7746 →
+  7678 → 7604 → 7569 → 7514 → **7381** (when the session was cut off).
+- **Final UB = 7381** (31% cut, 1106/1106 care points). Still improving
+  (~100-150/round) when stopped — a longer run should go further.
+- No N=12 LB attempted (would need per-output k≥8/9 proofs at 1106 care
+  points — expensive).
+
+### Tooling: `polish_loop.py`
+
+New driver script that automates the loop overnight: alternates ABC
+structural polish with `window_opt.py` passes, verifies care-correctness
+after every operation, keeps `factor{N}_opt_final_opt.blif` monotonic, and
+stops on a wall-clock budget or plateau. Flags: `--no-window`, `--no-abc`,
+`--win-iters N`, `--seed S`, `--max-out A,B`, `--max-gates A,B`.
+Run under `setsid nohup ... &` so shell timeouts can't group-kill it
+(happened once — the driver died with its launch shell).
+
+### Current table (Aug 22)
+
+```
+N | Semiprimes |  LB |  UB | Gap | UB source
+--|------------|----:|----:|----:|-------------------------------------------------
+ 4|          4 |   1 |   1 |   0 | SAT exact synthesis (proven optimal)
+ 5|          7 |   4 |   4 |   0 | SAT exact synthesis (proven optimal)
+ 6|         18 |  11 |  19 |   8 | ABC + corrected ODC windowed resynth
+ 7|         37 |  12 |  49 |  37 | cegis_lb.py k=11 UNSAT; polish loop (Aug 21)
+ 8|         76 |  10 | 147 | 137 | ABC + ODC windowed resynth; polish loop (Aug 21)
+ 9|        149 |   8 | 408 | 400 | per-output exact (p1,p2,q5 k=7 UNSAT); polish loop (Aug 21)
+10|        293 |   8 | 970 | 962 | per-output exact (p1,p2 k=7 UNSAT); ABC 2513 + polish loop (Aug 21)
+11|        575 |  10 |2283 |2273 | per-output exact (p1,q5 k=9 UNSAT); ABC 5264 + polish loop (Aug 22)
+12|       1106 |  —  |7381 |  —  | ABC 10763 baseline; polish loop (Aug 22, still improving)
+```
+
+### Remaining ideas
+
+- N=12 UB is still dropping ~100-150/round when stopped — resume the loop
+  for another few hours.
+- N=12 LB: per-output k=8/k=9 proofs at 1106 care points; k=7 would need
+  ~1-2 min each, k=8 maybe ~10-40 min. A parallel sweep over the 14+
+  nontrivial outputs could reach LB≥9.
+- N=11 p1 k=10: undecided (3h). Try Glucose4 (different solver) or a longer
+  budget; an UNSAT would give LB≥11, SAT would pin p1's exact min at 10.
+- N=13 baseline (~2.1x N=12 ≈ 22-23k) is cheap to build; the polish loop
+  would be slower per pass (~30s/iter at N=12, more at N=13) but the
+  alternation pattern should still work.
 k=7 undecided at 30s for the harder outputs.

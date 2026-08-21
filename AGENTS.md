@@ -57,6 +57,8 @@ N | Semiprimes |  LB |  UB | Gap | UB source
  8|         76 |  10 | 147 | 137 | ABC + ODC windowed resynth; polish loop (Aug 21)
  9|        149 |   8 | 408 | 400 | per-output exact (p1,p2,q5 k=7 UNSAT); polish loop (Aug 21)
 10|        293 |   8 | 970 | 962 | per-output exact (p1,p2 k=7 UNSAT); ABC 2513 + polish loop (Aug 21)
+11|        575 |  10 |2283 |2273 | per-output exact (p1,q5 k=9 UNSAT); ABC 5264 + polish loop (Aug 22)
+12|       1106 |  —  |7381 |  —  | ABC 10763 baseline; polish loop (Aug 22, still improving)
 ```
 
 LBs for N=4,5 from full SAT proof in `survey.py`. LB for N=6 from
@@ -67,13 +69,16 @@ proved k=10 (3.6s) and k=11 (43s) UNSAT, giving LB=12 (k=12 undecided after
 N=9 LB=8 from per-output exact synthesis (`n9_per_output_lb.py`): p1, p2, q5
 each need at least 8 gates alone (k=7 UNSAT), so any full circuit needs at
 least 8. N=10 LB=8 same method: p1, p2 need at least 8 gates (k=7 UNSAT).
+N=11 LB=10 from per-output exact (`single_output.py`): p1 and q5 each prove
+k=9 UNSAT (2955s / 6607s; p2,q5 prove k=8 too); p1 k=10 undecided after 3h.
 
 UBs from ABC + multi-pass windowed resynthesis (corrected ODC mode) plus the
-**polish loop (Aug 21)**: alternate `strash; compress2rs; fraig; balance`
-(structural, exact on all inputs) with windowed resynthesis (don't-care
-exploitation). Neither alone reaches these values; each opens new basins for
-the other. N=7 74→49, N=8 208→147, N=9 503→408, N=10 2513→970. N=6 stayed at
-19 (structural polish finds nothing there).
+**polish loop**: alternate `strash; compress2rs; fraig; balance` (structural,
+exact on all inputs) with windowed resynthesis (don't-care exploitation).
+Neither alone reaches these values; each opens new basins for the other.
+N=7 74→49, N=8 208→147, N=9 503→408, N=10 2513→970, N=11 5264→2283,
+N=12 10763→7381 (still improving when stopped). N=6 stayed at 19 (structural
+polish finds nothing there).
 
 ## Tools
 
@@ -88,9 +93,10 @@ the other. N=7 74→49, N=8 208→147, N=9 503→408, N=10 2513→970. N=6 staye
 | File | Purpose |
 |------|---------|
 | `window_opt.py` | SAT-based windowed resynthesis. Primary UB tool. |
+| `polish_loop.py` | Overnight UB driver: alternates ABC structural polish with `window_opt.py` passes, verifies care-correctness after every op, keeps `factor{N}_opt_final_opt.blif` monotonic. Flags: `--no-window`, `--no-abc`, `--win-iters N`, `--seed S`, `--max-out A,B`, `--max-gates A,B`. Run under `setsid nohup` so shell timeouts can't group-kill it. |
 | `cegis_lb.py` | CEGIS LB loop over care-point subsets (pairwise AMO kept). Validated: N=4 (k=0 UNSAT, k=1 SAT), N=5 (k=3 UNSAT, k=4 SAT), N=6 (k=10 UNSAT in 29.6s, LB=11). |
 | `single_output.py` | Per-output exact synthesis: minimum AIG gates for one output bit alone (exact). N=6: p1,p2,q1,q2=5, q3=6, q4=3 → zero-sharing total 29. |
-| `n9_per_output_lb.py` | Per-output exact LB; takes N as argv (default 9). N=9/N=10: p1,p2 (and q5 at N=9) k=7 UNSAT → LB=8. |
+| `n9_per_output_lb.py` | Per-output exact LB; takes N as argv (default 9). N=9/N=10: p1,p2 (and q5 at N=9) k=7 UNSAT → LB=8. N=11 LB=10 from `single_output.py`: p1,q5 k=9 UNSAT. |
 | `core_gate_search.py` | Rank candidate shared core gates (cost + per-output extension mins). Best single N=6 shared gate: p1's output function → 21. |
 | `joint_core_search.py` | 2-gate joint core search over the candidate pool (exact core cost). N=6 best 21 (seed pool) / 20 (enriched pool via beam). |
 | `core_build.py` | Greedy incremental shared-core builder; harvests new candidate gates each step into `core_candidates.json` (gitignored). N=6: 3-gate core → 19, plateaus. |
@@ -115,6 +121,10 @@ the other. N=7 74→49, N=8 208→147, N=9 503→408, N=10 2513→970. N=6 staye
 | `factor9_opt_final_opt.blif` | N=9 after windowed resynthesis + polish loop (408 AND gates). |
 | `factor10_opt_final.blif` | N=10 ABC pipeline baseline (2513 AND gates). |
 | `factor10_opt_final_opt.blif` | N=10 after windowed resynthesis + polish loop (970 AND gates). |
+| `factor11_opt_final.blif` | N=11 ABC pipeline baseline (5264 AND gates). |
+| `factor11_opt_final_opt.blif` | N=11 after polish loop (2283 AND gates). |
+| `factor12_opt_final.blif` | N=12 ABC pipeline baseline (10763 AND gates). |
+| `factor12_opt_final_opt.blif` | N=12 after polish loop (7381 AND gates; still improving when stopped). |
 
 Other tracked files not listed above (`rank_core_gates.py`,
 `exact_factor6*.py`, `experiment.py`, `factor4.blif`, `factor6*.blif`,
@@ -125,22 +135,24 @@ history).
 
 ## Current Handoff
 
-- **State as of Aug 21, 2026** — the results table above is current. Any
+- **State as of Aug 22, 2026** — the results table above is current. Any
   LB/UB claims in NOTES.md not matching the table are archival; the table
   wins. All UBs from the polish loop are verified care-correct.
 - Canonical final UB artifacts are `factor6_opt_final_opt.blif`,
   `factor7_opt_final_opt_opt.blif`,
   `factor8_opt_final_opt_opt_opt_opt_opt.blif`,
-  `factor9_opt_final_opt.blif`, and `factor10_opt_final_opt.blif`.
+  `factor9_opt_final_opt.blif`, `factor10_opt_final_opt.blif`,
+  `factor11_opt_final_opt.blif`, and `factor12_opt_final_opt.blif`.
   Untouched ABC baselines are the `factor{N}_opt_final.blif` files.
-- **The polish loop is the current UB workhorse (Aug 21).** Alternate ABC
+- **The polish loop is the current UB workhorse.** Alternate ABC
   structural polish (`strash; compress2rs; fraig; balance`) with SAT
   windowed resynthesis (`window_opt.py --max-out 4-5 --max-gates 40-100`).
   Each opens basins the other misses: resynthesis alone plateaued N=9 at 503
-  and N=10 at 1346; the loop reached 408 and 970. Run ABC from
-  `~/factor-circuit/abc/` (workdir) so the `abc.rc` alias scripts load —
-  from the repo root `compress2rs`/`resyn2rs` are "unknown command".
-  `compress2rs` and `resyn2rs` give similar results; `fraig` alone is weaker.
+  and N=10 at 1346; the loop reached 408, 970, 2283 (N=11), 7381 (N=12).
+  Run ABC from `~/factor-circuit/abc/` (workdir) so the `abc.rc` alias
+  scripts load — from the repo root `compress2rs`/`resyn2rs` are "unknown
+  command". `compress2rs` and `resyn2rs` give similar results; `fraig` alone
+  is weaker. `polish_loop.py` automates the cycle overnight.
 - **CEGIS/LB findings, do not regress:**
   1. Keep the per-call conflict budget FIXED at 5000 (survey.py `check_k`
      style). Escalating 5000→500k made the identical k=10 instance go from
@@ -162,12 +174,16 @@ history).
   not exist. Deciding it requires the heavy k=18 exact-synthesis grind or a
   new architecture.
 - **Open LB walls:** N=6 k=11 (undecided after 20M+ conflicts across
-  encodings/solvers), N=7 k=12 (undecided after 19min/8M conflicts).
-  Per-output exact LB (single output, no gate sharing) is stuck at 8 for
-  N=9/N=10 — k=7 UNSAT is the feasible limit per output.
-- **Most valuable next step** (for the growth-curve goal): **N=11 UB** —
-  `make_factor9_blif.py 11` for the ABC baseline (est. ~5.5k gates), then
-  the polish loop. Care density stays ~28% so the loop should transfer.
+  encodings/solvers), N=7 k=12 (undecided after 19min/8M conflicts), N=11
+  p1 k=10 (undecided after 3h, cd153 — try Glucose4 or a longer budget).
+  Per-output exact LB: N=9/N=10 stuck at 8 (k=7 UNSAT the feasible limit);
+  N=11 reached 10 (p1, q5 k=9 UNSAT).
+- **Most valuable next step** (for the growth-curve goal): **resume the
+  N=12 UB polish loop** (`polish_loop.py 12 ... --win-iters 80`), which was
+  still dropping ~100-150/round at 7381 when stopped; then a **N=12 per-output
+  LB sweep** (1106 care points; k=7 ~1-2 min each, k=8 ~10-40 min) to reach
+  LB≥9. N=13 baseline is cheap (~2.1x N=12 ≈ 22k) but the loop gets slower
+  per pass.
 - Generated data `single_output_circuits.json` and `core_candidates.json`
   are gitignored (regenerated by `single_output.py` / `core_build.py`).
 - Before continuing, run:
@@ -189,6 +205,8 @@ history).
       ("factor8_opt_final_opt_opt_opt_opt_opt.blif", 8),
       ("factor9_opt_final_opt.blif", 9),
       ("factor10_opt_final_opt.blif", 10),
+      ("factor11_opt_final_opt.blif", 11),
+      ("factor12_opt_final_opt.blif", 12),
   ]:
       aig = parse_blif(path)
       care = enumerate_care(n)
