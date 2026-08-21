@@ -1117,7 +1117,7 @@ def parse_flag(argv, flag, default=None):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <blif_file> [N] [num_iterations] [--seed S] [--max-in I] [--max-out O] [--max-gates G]")
+        print(f"Usage: {sys.argv[0]} <blif_file> [N] [num_iterations] [--seed S] [--max-in I] [--max-out O] [--max-gates G] [--out PATH]")
         sys.exit(1)
 
     blif_path = sys.argv[1]
@@ -1129,6 +1129,7 @@ if __name__ == "__main__":
     max_inputs = 6
     max_outputs = 3
     max_gates = 20
+    out_path = None
     for i, arg in enumerate(sys.argv):
         if arg == '--seed' and i + 1 < len(sys.argv):
             seed = int(sys.argv[i + 1])
@@ -1140,6 +1141,8 @@ if __name__ == "__main__":
             max_outputs = int(sys.argv[i + 1])
         if arg == '--max-gates' and i + 1 < len(sys.argv):
             max_gates = int(sys.argv[i + 1])
+        if arg == '--out' and i + 1 < len(sys.argv):
+            out_path = sys.argv[i + 1]
 
     print(f"Loading {blif_path}...")
     aig = parse_blif(blif_path)
@@ -1163,7 +1166,8 @@ if __name__ == "__main__":
     )
 
     if success and result_aig is not None:
-        out_path = blif_path.replace('.blif', '_opt.blif')
+        if out_path is None:
+            out_path = blif_path.replace('.blif', '_opt.blif')
         result_aig.to_blif(out_path)
         print(f"\nOptimized circuit written to {out_path}")
 

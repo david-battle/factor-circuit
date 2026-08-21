@@ -41,25 +41,39 @@ SAT-proven lower bounds.
 
 ## Results
 
+Column convention (use in all tables):
+- **LB** = the optimal circuit has **at least** this many AND gates (SAT-proven).
+- **UB** = a verified circuit of **this exact size** has been constructed.
+- **Gap** = UB − LB (width of the interval containing the true optimum).
+  Gap 0 = proven optimal.
+
 ```
-N  | Semiprimes | LB  | UB   | Gap  | UB Source
----|------------|-----|------|------|-------------------------------
- 4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
- 5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
- 6 |         18 | ≥11 |   19 | ≤ 8  | ABC + corrected ODC windowed resynth (LB corrected)
- 7 |         37 | ≥12 |   74 | ≤ 62 | cegis_lb.py k=11 UNSAT (43s); ABC + corrected ODC windowed resynth
- 8 |         76 |  10 |  208 | 198  | ABC + corrected ODC windowed resynth
- 9 |        149 |   8 |  503 |  ?   | per-output exact (p1,p2,q5 k=7 UNSAT); ABC 1158 + ODC windowed resynth
+N | Semiprimes |  LB |  UB | Gap | UB source
+--|------------|----:|----:|----:|-------------------------------------------------
+ 4|          4 |   1 |   1 |   0 | SAT exact synthesis (proven optimal)
+ 5|          7 |   4 |   4 |   0 | SAT exact synthesis (proven optimal)
+ 6|         18 |  11 |  19 |   8 | ABC + corrected ODC windowed resynth
+ 7|         37 |  12 |  49 |  37 | cegis_lb.py k=11 UNSAT; polish loop (Aug 21)
+ 8|         76 |  10 | 147 | 137 | ABC + ODC windowed resynth; polish loop (Aug 21)
+ 9|        149 |   8 | 408 | 400 | per-output exact (p1,p2,q5 k=7 UNSAT); polish loop (Aug 21)
+10|        293 |   8 | 970 | 962 | per-output exact (p1,p2 k=7 UNSAT); ABC 2513 + polish loop (Aug 21)
 ```
 
 LBs for N=4,5 from full SAT proof in `survey.py`. LB for N=6 from
 `survey.py` plus `exact_n6_from_above.py` / `run_n6_sweep.py`
-(LB≥11; k=10 proven UNSAT, k=9 proven UNSAT). N=7 LB is new: `cegis_lb.py`
-proved k=10 (3.6s) and k=11 (43s) UNSAT, giving LB≥12 (k=12 undecided after
+(LB=11; k=10 proven UNSAT, k=9 proven UNSAT). N=7 LB is new: `cegis_lb.py`
+proved k=10 (3.6s) and k=11 (43s) UNSAT, giving LB=12 (k=12 undecided after
 19min — the current wall). N=8 LB from the `survey.py` one-hot SAT encoding.
-N=9 LB≥8 from per-output exact synthesis (`n9_per_output_lb.py`): p1, p2, q5
-each need ≥8 gates alone (k=7 UNSAT), so any full circuit needs ≥8.
-UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
+N=9 LB=8 from per-output exact synthesis (`n9_per_output_lb.py`): p1, p2, q5
+each need at least 8 gates alone (k=7 UNSAT), so any full circuit needs at
+least 8. N=10 LB=8 same method: p1, p2 need at least 8 gates (k=7 UNSAT).
+
+UBs from ABC + multi-pass windowed resynthesis (corrected ODC mode) plus the
+**polish loop (Aug 21)**: alternate `strash; compress2rs; fraig; balance`
+(structural, exact on all inputs) with windowed resynthesis (don't-care
+exploitation). Neither alone reaches these values; each opens new basins for
+the other. N=7 74→49, N=8 208→147, N=9 503→408, N=10 2513→970. N=6 stayed at
+19 (structural polish finds nothing there).
 
 ## Tools
 
@@ -74,9 +88,9 @@ UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
 | File | Purpose |
 |------|---------|
 | `window_opt.py` | SAT-based windowed resynthesis. Primary UB tool. |
-| `cegis_lb.py` | CEGIS LB loop over care-point subsets (pairwise AMO kept). Validated: N=4 (k=0 UNSAT, k=1 SAT), N=5 (k=3 UNSAT, k=4 SAT), N=6 (k=10 UNSAT in 29.6s, LB≥11). |
+| `cegis_lb.py` | CEGIS LB loop over care-point subsets (pairwise AMO kept). Validated: N=4 (k=0 UNSAT, k=1 SAT), N=5 (k=3 UNSAT, k=4 SAT), N=6 (k=10 UNSAT in 29.6s, LB=11). |
 | `single_output.py` | Per-output exact synthesis: minimum AIG gates for one output bit alone (exact). N=6: p1,p2,q1,q2=5, q3=6, q4=3 → zero-sharing total 29. |
-| `n9_per_output_lb.py` | Per-output exact LB for N=9: p1,p2,q5 k=7 UNSAT → each needs ≥8 gates, so full circuit LB≥8. |
+| `n9_per_output_lb.py` | Per-output exact LB; takes N as argv (default 9). N=9/N=10: p1,p2 (and q5 at N=9) k=7 UNSAT → LB=8. |
 | `core_gate_search.py` | Rank candidate shared core gates (cost + per-output extension mins). Best single N=6 shared gate: p1's output function → 21. |
 | `joint_core_search.py` | 2-gate joint core search over the candidate pool (exact core cost). N=6 best 21 (seed pool) / 20 (enriched pool via beam). |
 | `core_build.py` | Greedy incremental shared-core builder; harvests new candidate gates each step into `core_candidates.json` (gitignored). N=6: 3-gate core → 19, plateaus. |
@@ -85,7 +99,7 @@ UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
 | `n6_exact_sweep.py` | Parallel N=6 exact-synthesis sweep over k values. |
 | `subset_probe.py` | Parallel care-subset SAT probe for hard-instance diagnosis. |
 | `survey.py` | ABC UB survey + SAT LB binary search; source of N=4/N=5 exact proofs. |
-| `make_factor9_blif.py` | Builds `factor9_opt_final.blif` (ABC baseline) with persistence (survey.py's missing-artifact fix). |
+| `make_factor9_blif.py` | Builds `factor{N}_opt_final.blif` (ABC baseline, N as argv, default 9) with persistence (survey.py's missing-artifact fix). |
 | `exact_n6_from_above.py` | Current N=6 exact-synthesis helper, testing k values from the proven lower bound upward. |
 | `run_n6_sweep.py` | N=6 windowed-resynthesis parameter sweep around the 19-gate UB. |
 | `exact_factor6_budget.py` | Legacy N=6 budget-based exact-synthesis experiment. |
@@ -94,26 +108,40 @@ UBs for N=6-8 from ABC + multi-pass windowed resynthesis (corrected ODC mode).
 | `factor6_opt_final_opt.blif` | N=6 after windowed resynthesis (19 AND gates). |
 | `factor7_opt.blif` | N=7 ABC-optimized baseline (229 AND gates). |
 | `factor7_opt_final.blif` | N=7 ABC pipeline baseline (133 AND gates). |
-| `factor7_opt_final_opt_opt.blif` | N=7 after windowed resynthesis (74 AND gates). |
+| `factor7_opt_final_opt_opt.blif` | N=7 after windowed resynthesis + polish loop (49 AND gates). |
 | `factor8_opt_final.blif` | N=8 ABC pipeline baseline (347 AND gates). |
-| `factor8_opt_final_opt_opt_opt_opt_opt.blif` | N=8 after windowed resynthesis (208 AND gates). |
+| `factor8_opt_final_opt_opt_opt_opt_opt.blif` | N=8 after windowed resynthesis + polish loop (147 AND gates). |
 | `factor9_opt_final.blif` | N=9 ABC pipeline baseline (1158 AND gates). |
-| `factor9_opt_final_opt.blif` | N=9 after windowed resynthesis (503 AND gates). |
+| `factor9_opt_final_opt.blif` | N=9 after windowed resynthesis + polish loop (408 AND gates). |
+| `factor10_opt_final.blif` | N=10 ABC pipeline baseline (2513 AND gates). |
+| `factor10_opt_final_opt.blif` | N=10 after windowed resynthesis + polish loop (970 AND gates). |
 
 Other tracked files not listed above (`rank_core_gates.py`,
-`exact_factor6*.py`, `experiment.py`, intermediate `factor*_opt*.blif`)
-are legacy/scratch from earlier sessions — superseded, kept for history.
+`exact_factor6*.py`, `experiment.py`, `factor4.blif`, `factor6*.blif`,
+`factor7_raw.blif`, `factor8_opt.blif`, etc.) are legacy/scratch from
+earlier sessions — superseded, kept for history. Superseded intermediate
+`_opt`-chain BLIFs were deleted from tracking on Aug 21 (still in git
+history).
 
 ## Current Handoff
 
-- Current best results are the table above. Treat older `LB=10` claims for
-  N=6 as superseded; the corrected status is `LB≥11`, `UB=19`.
+- **State as of Aug 21, 2026** — the results table above is current. Any
+  LB/UB claims in NOTES.md not matching the table are archival; the table
+  wins. All UBs from the polish loop are verified care-correct.
 - Canonical final UB artifacts are `factor6_opt_final_opt.blif`,
   `factor7_opt_final_opt_opt.blif`,
-  `factor8_opt_final_opt_opt_opt_opt_opt.blif`, and
-  `factor9_opt_final_opt.blif`.
-- `cegis_lb.py` reproduces the N=6 proof (k=10 UNSAT in 29.6s, LB≥11) using
-  the survey.py encoding on care subsets. Empirical findings, do not regress:
+  `factor8_opt_final_opt_opt_opt_opt_opt.blif`,
+  `factor9_opt_final_opt.blif`, and `factor10_opt_final_opt.blif`.
+  Untouched ABC baselines are the `factor{N}_opt_final.blif` files.
+- **The polish loop is the current UB workhorse (Aug 21).** Alternate ABC
+  structural polish (`strash; compress2rs; fraig; balance`) with SAT
+  windowed resynthesis (`window_opt.py --max-out 4-5 --max-gates 40-100`).
+  Each opens basins the other misses: resynthesis alone plateaued N=9 at 503
+  and N=10 at 1346; the loop reached 408 and 970. Run ABC from
+  `~/factor-circuit/abc/` (workdir) so the `abc.rc` alias scripts load —
+  from the repo root `compress2rs`/`resyn2rs` are "unknown command".
+  `compress2rs` and `resyn2rs` give similar results; `fraig` alone is weaker.
+- **CEGIS/LB findings, do not regress:**
   1. Keep the per-call conflict budget FIXED at 5000 (survey.py `check_k`
      style). Escalating 5000→500k made the identical k=10 instance go from
      ~29s/626K conflicts to undecided at 2.1M+ conflicts.
@@ -122,39 +150,24 @@ are legacy/scratch from earlier sessions — superseded, kept for history.
   3. `--max-add 4` (gradual subset growth) stalls on hard candidate SAT
      searches near the boundary (|S|=12, k=10 N=6: 4.4M conflicts undecided).
      `--max-add 0` (add all failures, jump to full set) matches survey.py
-     performance. The N=6 k=10 unsat core appears to need ~the full care set,
-      so CEGIS's per-call clause reduction does not currently pay off for the
-      LB direction.
-- **N=6 structure & the 18-gate question (Aug 20):** Only 6 of 12 output bits
-  need computation (`p1,p2,q1,q2,q3,q4`); `p0=x0`, the rest are constants.
-  Per-output exact minima (no sharing) total 29. Core-decomposition search:
-  1 shared gate → 21, 2 shared gates → 20 (beam, enriched pool), 3 shared
-  gates → 19. The "shared core + independent per-output extensions"
-  architecture bottoms out at 19 across three independent methods (greedy,
-  joint, beam). **An 18-gate circuit has NOT been found and NOT been ruled
-  out**: it would need interleaved/extension-sharing structure that the
-  core+extension box cannot express, or may not exist. Deciding it requires
-  the heavy k=18 exact-synthesis grind or a new architecture.
-- Open LB walls: N=6 k=11 (undecided after 20M+ conflicts across
+     performance. CEGIS clause reduction does not currently pay off for the
+     LB direction.
+- **N=6 structure & the 18-gate question:** Only 6 of 12 output bits need
+  computation (`p1,p2,q1,q2,q3,q4`); `p0=x0`, the rest are constants.
+  Per-output exact minima (no sharing) total 29. The "shared core +
+  independent per-output extensions" architecture bottoms out at 19 across
+  three independent methods (greedy, joint, beam). **An 18-gate circuit has
+  NOT been found and NOT been ruled out**: it would need interleaved /
+  extension-sharing structure the core+extension box cannot express, or may
+  not exist. Deciding it requires the heavy k=18 exact-synthesis grind or a
+  new architecture.
+- **Open LB walls:** N=6 k=11 (undecided after 20M+ conflicts across
   encodings/solvers), N=7 k=12 (undecided after 19min/8M conflicts).
-- **N=9 (Aug 20):** ABC survey UB = 1158 (hard plateau from round 1, 600s,
-  `python3 survey.py 9 600 0`). LB≥8 (per-output exact, see
-  `n9_per_output_lb.py`). `survey.py` does not
-  persist the best BLIF; `make_factor9_blif.py` reproduces the ABC pipeline
-  with explicit `write_blif`, giving `factor9_opt_final.blif` (1158 gates,
-  149/149). Windowed resynthesis: 11 passes (seeds 42,123,999,314,777,2026,
-  4242,5555,1337,2718,31415,16180; max_out=4/max_gates=30 for the last
-  several) → **503 gates** (`factor9_opt_final_opt.blif`, 149/149), a 57%
-  reduction from the ABC baseline. The last few passes saved only 2, 1
-  gates — near the plateau. `max_in=7` windows are ~6x slower per iteration
-   and found nothing (abandoned). Standard window params stop helping around
-   530; switching to `--max-out 4 --max-gates 30` found the rest. **Caveat:**
-   the LB≥8 is per-output (gates not shared) — sound but weak. The UB=503
-   circuit's outputs clearly share internal gates, so the true optimum is
-   somewhere between 8 and 503. A stronger N=9 LB needs a shared-gate or
-   full-circuit SAT argument, which hits the one-hot scaling wall at k>8;
-   the per-output minima plateau (p1,p2,q5=8; rest=7) because k=7 proof is
-   the feasible limit per output.
+  Per-output exact LB (single output, no gate sharing) is stuck at 8 for
+  N=9/N=10 — k=7 UNSAT is the feasible limit per output.
+- **Most valuable next step** (for the growth-curve goal): **N=11 UB** —
+  `make_factor9_blif.py 11` for the ABC baseline (est. ~5.5k gates), then
+  the polish loop. Care density stays ~28% so the loop should transfer.
 - Generated data `single_output_circuits.json` and `core_candidates.json`
   are gitignored (regenerated by `single_output.py` / `core_build.py`).
 - Before continuing, run:
@@ -175,6 +188,7 @@ are legacy/scratch from earlier sessions — superseded, kept for history.
       ("factor7_opt_final_opt_opt.blif", 7),
       ("factor8_opt_final_opt_opt_opt_opt_opt.blif", 8),
       ("factor9_opt_final_opt.blif", 9),
+      ("factor10_opt_final_opt.blif", 10),
   ]:
       aig = parse_blif(path)
       care = enumerate_care(n)
@@ -189,10 +203,44 @@ All code assumes `x_i` = bit i (LSB). BLIF files list inputs in descending
 order (`x(N-1) ... x0`) so that MSB-first truth table patterns align with
 this convention. `survey.py`'s `generate_blif()` outputs this order.
 
+## Resynthesis Output Naming
+
+Do NOT chain `_opt` suffixes across windowed-resynthesis passes
+(`factor9_opt_final_opt_opt_opt_...`). It happened once and was a mess to
+untangle. Instead, keep ONE canonical "current best" file
+(`factor{N}_opt_final_opt.blif`) and always write the next pass to it:
+
+1. Run: `python3 window_opt.py factor{N}_opt_final_opt.blif 10 200 --seed S --out /tmp/pass.blif`
+2. On success (293/293 verified), replace the canonical file:
+   `mv /tmp/pass.blif factor{N}_opt_final_opt.blif`
+3. Keep `factor{N}_opt_final.blif` as the untouched ABC baseline.
+
+`window_opt.py` supports `--out PATH` for this (added Aug 20); without it the
+default `_opt`-append behavior only makes sense for the FIRST resynthesis pass.
+
 ## Working Style
 
 Proceed one substantive action at a time when debugging. Don't give a
 cascade of commands before confirming the previous one worked.
+
+## "Handoff" Command
+
+When the user says **"handoff"** (or "wrap up", "leave the repo in a good
+state"), run the full handoff routine without asking what it entails:
+
+1. **Save state** — append a session log to `NOTES.md`: what was done, the
+   current results table (plain-number LB/UB convention), and remaining
+   ideas so a fresh context can pick up where this one left off.
+2. **Sync AGENTS.md** — make the "Current Handoff" section and Key Files
+   table accurate: current results, canonical artifacts, any new tools or
+   techniques (e.g. the polish loop), and current walls/next steps.
+3. **Clean up** — delete temp/intermediate artifacts; for regenerable junk
+   default to `.gitignore`, not deletion. Don't ask the user about routine
+   cleanup decisions.
+4. **Verify** — run `python3 -m compileall -q .`, `git diff --check`, and
+   the canonical-BLIF verification snippet in this file.
+5. **Commit** — stage the intended changes and commit with a concise message
+   matching repo style. Do **not** push.
 
 ## Git
 

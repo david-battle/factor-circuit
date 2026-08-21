@@ -15,8 +15,10 @@ import tempfile
 from survey import count_abc_gates_from_output, enumerate_care, generate_blif
 
 ABC_BIN = os.path.expanduser("~/factor-circuit/abc/abc")
-N = 9
-OUT = "factor9_opt_final.blif"
+
+
+N = int(sys.argv[1]) if len(sys.argv) > 1 else 9
+OUT = f"factor{N}_opt_final.blif"
 
 STRATEGIES = [
     "strash; rewrite; refactor; balance",

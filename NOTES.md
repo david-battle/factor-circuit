@@ -9,15 +9,22 @@ prime factors. Non-semiprime inputs are don't-cares.
 
 **Results so far:**
 
+Column convention (use in all tables):
+- **LB** = the optimal circuit has **at least** this many AND gates (SAT-proven).
+- **UB** = a verified circuit of **this exact size** has been constructed.
+- **Gap** = UB − LB (width of the interval containing the true optimum).
+  Gap 0 = proven optimal.
+
 ```
-N  | Semiprimes | LB  | UB   | Gap  | UB Source
----|------------|-----|------|------|-------------------------------
- 4 |          4 |   1 |    1 |   =  | SAT exact synthesis (proven)
- 5 |          7 |   4 |    4 |   =  | SAT exact synthesis (proven)
- 6 |         18 | ≥11 |   19 | ≤ 8  | ABC + ODC windowed resynth (LB corrected)
- 7 |         37 | ≥12 |   74 | ≤ 62 | cegis_lb.py k=11 UNSAT; ABC + ODC windowed resynthesis
- 8 |         76 |  10 |  208 | 198  | ABC + ODC windowed resynthesis
- 9 |        149 |   8 |  503 |  ?   | per-output exact (p1,p2,q5 k=7 UNSAT); ABC 1158 + ODC windowed resynthesis
+N | Semiprimes |  LB |  UB | Gap | UB Source
+--|------------|----:|----:|----:|-------------------------------
+ 4|          4 |   1 |   1 |   0 | SAT exact synthesis (proven)
+ 5|          7 |   4 |   4 |   0 | SAT exact synthesis (proven)
+ 6|         18 |  11 |  19 |   8 | ABC + ODC windowed resynth (LB corrected)
+ 7|         37 |  12 |  49 |  37 | cegis_lb.py k=11 UNSAT; polish loop (Aug 21)
+ 8|         76 |  10 | 147 | 137 | ABC + ODC windowed resynth; polish loop (Aug 21)
+ 9|        149 |   8 | 408 | 400 | per-output exact (p1,p2,q5 k=7 UNSAT); polish loop (Aug 21)
+10|        293 |   8 | 970 | 962 | per-output exact (p1,p2 k=7 UNSAT); polish loop (Aug 21)
 ```
 
 ## How We Got Here — Chronological Summary
@@ -624,4 +631,65 @@ Nontrivial outputs: p1-p4, q1-q7 (p0=x0, p5-p8/q8=0, q0=1).
 - **LB ≥ 8** (6m20s total sweep).
 
 Runtime held to estimates: k≤6 UNSAT in 0-7s, k=7 UNSAT in ~16-29s,
+k=7 undecided at 30s for the harder outputs.
+
+## Session: N=10 UB + the ABC-polish loop (Aug 21, 2026)
+
+### Discovery: polish loop breaks every plateau
+
+Testing Gemini's suggestion to use ABC's high-effort scripts, ran
+`strash; compress2rs; fraig; balance` on the current best circuit. ABC's
+`compress2rs`/`resyn2rs` are rc-aliases defined in `abc/abc.rc`; ABC must be
+invoked from `~/factor-circuit/abc/` (or the aliases are "unknown command").
+`fraig` (SAT sweeping) and `compress2rs` each cut the current circuit further
+even though windowed resynthesis had plateaued.
+
+**Key insight: alternate structural polish with SAT windowed resynthesis.**
+The polish re-shapes the AIG (structural, exact on ALL inputs), and the
+re-shaped circuit opens new ODC basins for windowed resynthesis that the
+polished-for-circuit's own plateau hid. Neither alone reaches the results.
+Cycle = polish (`compress2rs; fraig; balance`) → verify → windowed resynth
+(ODC, e.g. `--max-out 5 --max-gates 60-100`) → verify → repeat.
+
+### N=10 results (new row)
+
+- ABC baseline `factor10_opt_final.blif`: 2513 AND gates (2.17x N=9's 1158,
+  consistent with the ~2.2x/step pattern).
+- Resynthesis alone (default then bigger windows): 2513 → 1346.
+- Polish loop: 1346 → 1240 → 1160 → 1088 → 1054 → 1032 → 1005 → 996 →
+  990 → 985 → 979 → 974 → 972 → 970. **Final UB = 970** (61% cut,
+  293/293 care points). UB/2^N = 0.95 (N=9: 0.80, N=8: 0.57, N=7: 0.58).
+- N=10 per-output LB (parameterized `n9_per_output_lb.py 10`): **LB ≥ 8**
+  (p1, p2 each need ≥8 gates; k=7 UNSAT 25-28s). Same plateau as N=9.
+
+### Polish loop applied to older N (all verified care-correct)
+
+| N | old UB | polish loop final |
+|---|--------|-------------------|
+| 6 | 19     | 19 (structural polish finds nothing) |
+| 7 | 74     | 49 (74→69 polish→59→52→50→49) |
+| 8 | 208    | 147 (188→173→160→152→151→149→147) |
+| 9 | 503    | 408 (472→454→448→435→427→419→417→414→413→411→410→408) |
+
+### Tooling changes this session
+
+- `window_opt.py`: added `--out PATH` CLI flag so passes can write to an
+  explicit path instead of chaining `_opt` suffixes (the naming-chain mess
+  happened again at N=10; docs in AGENTS.md now mandate the canonical-file
+  workflow: `--out /tmp/pass.blif`, verify, `mv` into `factor{N}_opt_final_opt.blif`).
+- `make_factor9_blif.py`: accepts N as argv (default 9), writes
+  `factor{N}_opt_final.blif` — used for the N=10 ABC baseline.
+- `n9_per_output_lb.py`: accepts N as argv (default 9).
+- Repo cleaned: N=10 intermediate `_opt_opt...` chain removed; only
+  `factor10_opt_final.blif` (baseline) and `factor10_opt_final_opt.blif`
+  (canonical final) remain.
+
+### Remaining ideas (untried)
+
+- N=11 UB: ABC baseline est. ~5.5k gates; polish loop est. ~2-4x N=10 cost.
+  Care density stays ~28%, so the loop should work the same.
+- `resyn2rs` gave the same as `compress2rs` on N=10; `fraig` alone was
+  slightly weaker. A portfolio of polish scripts per cycle is untested.
+- The polish loop never found anything on N=6 (19 stays). The N=6 exact
+  question (does an 18-gate circuit exist) remains open.
 k=7 undecided at 30s for the harder outputs.

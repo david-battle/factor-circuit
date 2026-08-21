@@ -13,7 +13,8 @@ from single_output import check_single, enumerate_care
 
 
 def main():
-    N = 9
+    import sys
+    N = int(sys.argv[1]) if len(sys.argv) > 1 else 9
     care = enumerate_care(N)
     print(f"{len(care)} care points")
 
